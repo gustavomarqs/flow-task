@@ -1,13 +1,12 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { RecurringTaskEntry } from '@/types/recurring-task';
+import { RecurringTask, RecurringTaskEntry } from '@/types/recurring-task';
 import { Task } from '@/types/task';
-import { Play, Pause, Timer, Clock, Stop } from 'lucide-react';
+import { Play, Pause, Timer, Clock, CircleStop } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
 interface FocusModeProps {
@@ -264,7 +263,7 @@ export function FocusMode({
             )}
             
             <Button onClick={stopTimer} variant="destructive" size="lg" className="w-1/3">
-              <Stop className="mr-2" /> Encerrar
+              <CircleStop className="mr-2" /> Encerrar
             </Button>
           </div>
           
