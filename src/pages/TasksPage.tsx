@@ -103,6 +103,10 @@ export default function TasksPage() {
       return dateA - dateB;
     });
 
+  const handleCategoryClick = (category: string) => {
+    setActiveTab(`category-${category}`);
+  };
+
   return (
     <div className="animate-fade-in">
       <PageHeader 
@@ -120,48 +124,46 @@ export default function TasksPage() {
         />
       </div>
       
-      <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="mb-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} defaultValue="all" className="mb-6">
         <TabsList className="bg-dark-gray">
           <TabsTrigger value="all">Todas</TabsTrigger>
           <TabsTrigger value="pending">Pendentes</TabsTrigger>
           <TabsTrigger value="completed">Concluídas</TabsTrigger>
         </TabsList>
         
+        {/* Category filters - now properly part of the Tabs component */}
         <div className="mt-2 flex flex-wrap gap-2">
           {categories.map(category => (
-            <TabsTrigger 
+            <button 
               key={category}
-              value={`category-${category}`}
-              className="data-[state=active]:bg-neon data-[state=active]:text-deep-dark"
-              onClick={() => setActiveTab(`category-${category}`)}
+              className={`px-3 py-1.5 text-sm rounded-sm ${
+                activeTab === `category-${category}` 
+                  ? 'bg-neon text-deep-dark' 
+                  : 'bg-muted text-muted-foreground'
+              }`}
+              onClick={() => handleCategoryClick(category)}
             >
               {category}
-            </TabsTrigger>
+            </button>
           ))}
         </div>
-      </Tabs>
 
-      {filteredTasks.length > 0 ? (
-        <div>
-          {filteredTasks.map((task) => (
-            <TaskCard
-              key={task.id}
-              task={task}
-              onComplete={handleCompleteTask}
-              onEdit={handleEditTask}
-              onDelete={handleDeleteTask}
-            />
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-12 border border-dashed border-gray-700 rounded-lg">
-          <p className="text-gray-400">
-            {searchQuery 
-              ? "Nenhuma tarefa encontrada para sua pesquisa." 
-              : "Nenhuma tarefa adicionada ainda. Comece adicionando uma nova tarefa!"}
-          </p>
-        </div>
-      )}
+        {/* Must add TabsContent components for each tab */}
+        <TabsContent value="all" className="mt-2">
+          {renderTasksList()}
+        </TabsContent>
+        <TabsContent value="pending" className="mt-2">
+          {renderTasksList()}
+        </TabsContent>
+        <TabsContent value="completed" className="mt-2">
+          {renderTasksList()}
+        </TabsContent>
+        {categories.map(category => (
+          <TabsContent key={category} value={`category-${category}`} className="mt-2">
+            {renderTasksList()}
+          </TabsContent>
+        ))}
+      </Tabs>
       
       <TaskForm 
         isOpen={isFormOpen}
@@ -173,4 +175,28 @@ export default function TasksPage() {
       />
     </div>
   );
+
+  function renderTasksList() {
+    return filteredTasks.length > 0 ? (
+      <div>
+        {filteredTasks.map((task) => (
+          <TaskCard
+            key={task.id}
+            task={task}
+            onComplete={handleCompleteTask}
+            onEdit={handleEditTask}
+            onDelete={handleDeleteTask}
+          />
+        ))}
+      </div>
+    ) : (
+      <div className="text-center py-12 border border-dashed border-gray-700 rounded-lg">
+        <p className="text-gray-400">
+          {searchQuery 
+            ? "Nenhuma tarefa encontrada para sua pesquisa." 
+            : "Nenhuma tarefa adicionada ainda. Comece adicionando uma nova tarefa!"}
+        </p>
+      </div>
+    );
+  }
 }
