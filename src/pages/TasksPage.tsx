@@ -171,6 +171,7 @@ export default function TasksPage() {
 
   // Start focus mode
   const handleStartFocus = (taskType: 'regular' | 'recurring', task: Task | RecurringTask) => {
+    console.log("Starting focus mode with task:", task);
     setFocusTask({ type: taskType, task });
     setIsFocusModeOpen(true);
   };
@@ -314,6 +315,7 @@ export default function TasksPage() {
             onEditRecurringTask={handleEditRecurringTask}
             onDeleteRecurringTask={handleDeleteRecurringTask}
             onViewTaskHistory={handleViewTaskHistory}
+            onStartFocus={handleStartFocus}
           />
         </TabsContent>
         

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -215,14 +216,14 @@ export function FocusMode({
     setShowCompletionDialog(false);
   };
   
-  if (!isOpen) return null;
-  
   return (
-    <Dialog open={isOpen} onOpenChange={() => {
-      if (isRunning) {
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      if (!open && isRunning) {
         pauseTimer();
       }
-      onClose();
+      if (!open) {
+        onClose();
+      }
     }}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
