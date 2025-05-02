@@ -16,6 +16,7 @@ interface UnifiedTaskListProps {
   onEditRecurringTask: (task: RecurringTask) => void;
   onDeleteRecurringTask: (id: string) => void;
   onViewTaskHistory: (taskId: string) => void;
+  onStartFocus?: (taskType: 'regular' | 'recurring', task: Task | RecurringTask) => void;
 }
 
 export function UnifiedTaskList({
@@ -28,7 +29,8 @@ export function UnifiedTaskList({
   onCompleteRecurringTask,
   onEditRecurringTask,
   onDeleteRecurringTask,
-  onViewTaskHistory
+  onViewTaskHistory,
+  onStartFocus
 }: UnifiedTaskListProps) {
   // Obtém as entradas de hoje para tarefas recorrentes
   const today = new Date().toISOString().split('T')[0];
@@ -91,6 +93,7 @@ export function UnifiedTaskList({
               onComplete={onCompleteTask}
               onEdit={onEditTask}
               onDelete={onDeleteTask}
+              onStartFocus={onStartFocus ? () => onStartFocus('regular', task) : undefined}
             />
           );
         } else {
@@ -107,6 +110,7 @@ export function UnifiedTaskList({
               onEdit={onEditRecurringTask}
               onDelete={onDeleteRecurringTask}
               onViewHistory={onViewTaskHistory}
+              onStartFocus={onStartFocus ? () => onStartFocus('recurring', task) : undefined}
             />
           );
         }

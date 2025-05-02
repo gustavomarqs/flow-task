@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { CategoryBadge } from '@/components/CategoryBadge';
 import { Textarea } from "@/components/ui/textarea";
-import { Check, Edit, Trash2, ChartBar, RepeatIcon } from 'lucide-react';
+import { Check, Edit, Trash2, ChartBar, RepeatIcon, Timer } from 'lucide-react';
 import { RecurringTask, RecurringTaskEntry } from '@/types/recurring-task';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -22,6 +22,7 @@ interface RecurringTaskCardProps {
   onEdit: (task: RecurringTask) => void;
   onDelete: (id: string) => void;
   onViewHistory: (taskId: string) => void;
+  onStartFocus?: () => void;
 }
 
 export function RecurringTaskCard({ 
@@ -30,7 +31,8 @@ export function RecurringTaskCard({
   onComplete, 
   onEdit, 
   onDelete,
-  onViewHistory
+  onViewHistory,
+  onStartFocus
 }: RecurringTaskCardProps) {
   const [details, setDetails] = useState(todaysEntry?.details || "");
   const [showDetailsInput, setShowDetailsInput] = useState(false);
@@ -148,6 +150,17 @@ export function RecurringTaskCard({
           <ChartBar className="h-4 w-4 mr-1" /> 
           Histórico
         </Button>
+        {onStartFocus && !todaysEntry?.completed && (
+          <Button 
+            size="sm" 
+            variant="outline" 
+            className="text-yellow-500 border-yellow-500 hover:bg-yellow-500/10"
+            onClick={onStartFocus}
+          >
+            <Timer className="h-4 w-4 mr-1" /> 
+            Foco
+          </Button>
+        )}
         <Button 
           size="sm" 
           variant={todaysEntry?.completed ? "outline" : "secondary"}

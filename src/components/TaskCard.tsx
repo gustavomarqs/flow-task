@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CategoryBadge } from '@/components/CategoryBadge';
-import { Clock, Check, Edit, Trash2 } from 'lucide-react';
+import { Clock, Check, Edit, Trash2, Timer } from 'lucide-react';
 import { Task } from '@/types/task';
 import { formatDate } from '@/lib/utils';
 
@@ -19,9 +19,10 @@ interface TaskCardProps {
   onComplete: (id: string) => void;
   onEdit: (task: Task) => void;
   onDelete: (id: string) => void;
+  onStartFocus?: () => void;
 }
 
-export function TaskCard({ task, onComplete, onEdit, onDelete }: TaskCardProps) {
+export function TaskCard({ task, onComplete, onEdit, onDelete, onStartFocus }: TaskCardProps) {
   return (
     <Card className={`mb-4 neon-border hover:animate-pulse-glow transition-all ${task.completed ? 'opacity-60' : ''}`}>
       <CardHeader className="pb-2">
@@ -64,6 +65,17 @@ export function TaskCard({ task, onComplete, onEdit, onDelete }: TaskCardProps) 
         >
           <Edit className="h-4 w-4" />
         </Button>
+        {onStartFocus && !task.completed && (
+          <Button 
+            size="sm" 
+            variant="outline" 
+            className="text-yellow-500 border-yellow-500 hover:bg-yellow-500/10"
+            onClick={onStartFocus}
+          >
+            <Timer className="h-4 w-4 mr-1" /> 
+            Foco
+          </Button>
+        )}
         <Button 
           size="sm" 
           variant={task.completed ? "outline" : "secondary"}

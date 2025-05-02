@@ -1,9 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { PageHeader } from '@/components/PageHeader';
 import { TaskForm } from '@/components/TaskForm';
 import { TaskHistoryModal } from '@/components/TaskHistoryModal';
 import { WeeklyProgressCard } from '@/components/WeeklyProgressCard';
+import { FocusMode } from '@/components/FocusMode';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Task } from '@/types/task';
@@ -26,6 +26,13 @@ export default function TasksPage() {
   const [editingRecurringTask, setEditingRecurringTask] = useState<RecurringTask | null>(null);
   const [historyTask, setHistoryTask] = useState<RecurringTask | null>(null);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  
+  // Focus mode state
+  const [focusTask, setFocusTask] = useState<{
+    type: 'regular' | 'recurring';
+    task: Task | RecurringTask;
+  } | null>(null);
+  const [isFocusModeOpen, setIsFocusModeOpen] = useState(false);
   
   // Filter state
   const [searchQuery, setSearchQuery] = useState("");
@@ -162,6 +169,12 @@ export default function TasksPage() {
     }
   };
 
+  // Start focus mode
+  const handleStartFocus = (taskType: 'regular' | 'recurring', task: Task | RecurringTask) => {
+    setFocusTask({ type: taskType, task });
+    setIsFocusModeOpen(true);
+  };
+  
   // Filter tasks
   const filteredTasks = tasks.filter(task => {
     // Filter by search query
@@ -221,7 +234,6 @@ export default function TasksPage() {
       <WeeklyProgressCard 
         entries={taskEntries} 
         categories={categories}
-        className="mb-6" 
       />
       
       <div className="mb-4">
@@ -270,6 +282,7 @@ export default function TasksPage() {
             onEditRecurringTask={handleEditRecurringTask}
             onDeleteRecurringTask={handleDeleteRecurringTask}
             onViewTaskHistory={handleViewTaskHistory}
+            onStartFocus={handleStartFocus}
           />
         </TabsContent>
         
@@ -285,6 +298,7 @@ export default function TasksPage() {
             onEditRecurringTask={handleEditRecurringTask}
             onDeleteRecurringTask={handleDeleteRecurringTask}
             onViewTaskHistory={handleViewTaskHistory}
+            onStartFocus={handleStartFocus}
           />
         </TabsContent>
         
@@ -316,6 +330,7 @@ export default function TasksPage() {
               onEditRecurringTask={handleEditRecurringTask}
               onDeleteRecurringTask={handleDeleteRecurringTask}
               onViewTaskHistory={handleViewTaskHistory}
+              onStartFocus={handleStartFocus}
             />
           </TabsContent>
         ))}
@@ -338,6 +353,14 @@ export default function TasksPage() {
         onClose={() => setIsHistoryOpen(false)}
         task={historyTask}
         entries={historyTask ? getEntriesForTask(historyTask.id) : []}
+      />
+      
+      <FocusMode
+        selectedTask={focusTask}
+        isOpen={isFocusModeOpen}
+        onClose={() => setIsFocusModeOpen(false)}
+        onCompleteTask={handleCompleteTask}
+        onCompleteRecurringTask={handleCompleteRecurringTask}
       />
     </div>
   );
