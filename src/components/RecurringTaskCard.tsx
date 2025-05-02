@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { CategoryBadge } from '@/components/CategoryBadge';
 import { Textarea } from "@/components/ui/textarea";
-import { Check, Edit, Trash2, ChartBar } from 'lucide-react';
+import { Check, Edit, Trash2, ChartBar, RepeatIcon } from 'lucide-react';
 import { RecurringTask, RecurringTaskEntry } from '@/types/recurring-task';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -70,13 +70,16 @@ export function RecurringTaskCard({
   };
 
   return (
-    <Card className="mb-4 neon-border hover:animate-pulse-glow transition-all">
+    <Card className="mb-4 neon-border hover:animate-pulse-glow transition-all bg-gradient-to-r from-dark-gray to-indigo-900/20">
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
           <div className="flex-1">
-            <CardTitle className={todaysEntry?.completed ? "line-through text-gray-400" : ""}>
-              {task.title}
-            </CardTitle>
+            <div className="flex items-center gap-2">
+              <RepeatIcon size={16} className="text-blue-400" />
+              <CardTitle className={todaysEntry?.completed ? "line-through text-gray-400" : ""}>
+                {task.title}
+              </CardTitle>
+            </div>
             <CardDescription className="flex items-center mt-1 text-gray-400">
               Tarefa recorrente diária
             </CardDescription>

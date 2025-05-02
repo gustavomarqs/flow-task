@@ -6,14 +6,18 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Task } from '@/types/task';
+import { RecurringTask } from '@/types/recurring-task';
 import { v4 as uuidv4 } from 'uuid';
 import { CategoryBadge } from './CategoryBadge';
+import { Switch } from "@/components/ui/switch";
 
 interface TaskFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (task: Task) => void;
+  onSaveTask: (task: Task) => void;
+  onSaveRecurringTask: (task: RecurringTask) => void;
   editTask?: Task | null;
+  editRecurringTask?: RecurringTask | null;
   categories: string[];
   onAddCategory: (category: string) => void;
 }
@@ -21,8 +25,10 @@ interface TaskFormProps {
 export function TaskForm({ 
   isOpen, 
   onClose, 
-  onSave, 
+  onSaveTask,
+  onSaveRecurringTask,
   editTask = null,
+  editRecurringTask = null,
   categories,
   onAddCategory
 }: TaskFormProps) {
@@ -33,6 +39,7 @@ export function TaskForm({
   const [time, setTime] = useState("");
   const [newCategory, setNewCategory] = useState("");
   const [showNewCategory, setShowNewCategory] = useState(false);
+  const [isRecurring, setIsRecurring] = useState(false);
   
   useEffect(() => {
     if (editTask) {
@@ -41,6 +48,17 @@ export function TaskForm({
       setCategory(editTask.category);
       setDate(editTask.date);
       setTime(editTask.time || "");
+      setIsRecurring(false);
+    } else if (editRecurringTask) {
+      setTitle(editRecurringTask.title);
+      setDescription(editRecurringTask.description || "");
+      setCategory(editRecurringTask.category);
+      setIsRecurring(true);
+      
+      // Data padrão para o dia atual
+      const today = new Date().toISOString().split('T')[0];
+      setDate(today);
+      setTime("");
     } else {
       // Set today's date as default for new tasks
       const today = new Date().toISOString().split('T')[0];
@@ -49,24 +67,39 @@ export function TaskForm({
       setCategory("Treinos");
       setDate(today);
       setTime("");
+      setIsRecurring(false);
     }
-  }, [editTask, isOpen]);
+  }, [editTask, editRecurringTask, isOpen]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    const taskData: Task = {
-      id: editTask?.id || uuidv4(),
-      title,
-      description,
-      category,
-      date,
-      time,
-      completed: editTask?.completed || false,
-      createdAt: editTask?.createdAt || new Date().toISOString(),
-    };
+    if (isRecurring) {
+      const taskData: RecurringTask = {
+        id: editRecurringTask?.id || uuidv4(),
+        title,
+        description,
+        category,
+        active: editRecurringTask?.active !== undefined ? editRecurringTask.active : true,
+        createdAt: editRecurringTask?.createdAt || new Date().toISOString(),
+      };
+      
+      onSaveRecurringTask(taskData);
+    } else {
+      const taskData: Task = {
+        id: editTask?.id || uuidv4(),
+        title,
+        description,
+        category,
+        date,
+        time,
+        completed: editTask?.completed || false,
+        createdAt: editTask?.createdAt || new Date().toISOString(),
+      };
+      
+      onSaveTask(taskData);
+    }
     
-    onSave(taskData);
     onClose();
   };
 
@@ -79,12 +112,14 @@ export function TaskForm({
     }
   };
 
+  const isEditing = !!editTask || !!editRecurringTask;
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px] bg-dark-gray border border-neon/30">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold neon-gradient-text">
-            {editTask ? "Editar Tarefa" : "Nova Tarefa"}
+            {isEditing ? "Editar Tarefa" : "Nova Tarefa"}
           </DialogTitle>
         </DialogHeader>
         
@@ -165,30 +200,42 @@ export function TaskForm({
             )}
           </div>
           
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="date">Data</Label>
-              <Input
-                id="date"
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="bg-medium-gray"
-                required
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="time">Horário (opcional)</Label>
-              <Input
-                id="time"
-                type="time"
-                value={time}
-                onChange={(e) => setTime(e.target.value)}
-                className="bg-medium-gray"
-              />
-            </div>
+          <div className="flex items-center space-x-2">
+            <Switch 
+              id="recurring-task" 
+              checked={isRecurring}
+              onCheckedChange={setIsRecurring}
+              disabled={isEditing} // Não permitir alteração no modo de edição
+            />
+            <Label htmlFor="recurring-task">Tarefa Recorrente (diária)</Label>
           </div>
+          
+          {!isRecurring && (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="date">Data</Label>
+                <Input
+                  id="date"
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="bg-medium-gray"
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="time">Horário (opcional)</Label>
+                <Input
+                  id="time"
+                  type="time"
+                  value={time}
+                  onChange={(e) => setTime(e.target.value)}
+                  className="bg-medium-gray"
+                />
+              </div>
+            </div>
+          )}
           
           <div className="flex justify-end gap-3 pt-4">
             <Button type="button" variant="ghost" onClick={onClose}>
@@ -198,7 +245,11 @@ export function TaskForm({
               type="submit"
               className="bg-neon text-deep-dark hover:bg-neon-glow"
             >
-              {editTask ? "Salvar Alterações" : "Criar Tarefa"}
+              {isEditing 
+                ? "Salvar Alterações" 
+                : isRecurring 
+                  ? "Criar Tarefa Recorrente" 
+                  : "Criar Tarefa"}
             </Button>
           </div>
         </form>
