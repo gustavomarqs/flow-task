@@ -8,10 +8,6 @@ import AchievementsPage from "./pages/AchievementsPage";
 import ThoughtsPage from "./pages/ThoughtsPage";
 import NotFound from "./pages/NotFound";
 
-// Add UUID dependency
-<lov-add-dependency>uuid@latest</lov-add-dependency>
-<lov-add-dependency>@types/uuid@latest</lov-add-dependency>
-
 const queryClient = new QueryClient();
 
 const App = () => (
