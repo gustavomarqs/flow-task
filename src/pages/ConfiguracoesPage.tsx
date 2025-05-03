@@ -49,7 +49,11 @@ export default function ConfiguracoesPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Configurações" description="Gerencie suas preferências e dados" />
+      <PageHeader 
+        title="Configurações" 
+        description="Gerencie suas preferências e dados"
+        showAddButton={false} 
+      />
       
       <Tabs defaultValue="conta" className="w-full">
         <TabsList className="grid grid-cols-4 mb-8">

@@ -28,7 +28,7 @@ export default defineConfig(({ mode }) => ({
       output: {
         manualChunks: {
           react: ['react', 'react-dom', 'react-router-dom'],
-          ui: ['@/components/ui'],
+          ui: ['@/components/ui/button', '@/components/ui/toast', '@/components/ui/toaster', '@/components/ui/sidebar'],
         },
       },
     },

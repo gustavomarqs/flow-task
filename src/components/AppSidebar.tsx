@@ -51,7 +51,7 @@ export function AppSidebar() {
         <div className="flex justify-center">
           <Button 
             variant="outline" 
-            className="w-full border-neon text-neon hover:bg-neon hover:text-deep-dark transition-all duration-200"
+            className="w-full border-neon text-neon hover:bg-neon/10 hover:text-neon hover:shadow-[0_0_8px_rgba(10,255,242,0.5)] transition-all duration-200"
             onClick={() => navigate('/configuracoes')}
           >
             <Settings className="mr-2 h-4 w-4" /> Configurações
