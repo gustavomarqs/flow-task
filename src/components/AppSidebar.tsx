@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ListTodo, Trophy, BrainCircuit, Plus } from 'lucide-react';
+import { ListTodo, Trophy, BrainCircuit, Settings } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
@@ -52,9 +52,9 @@ export function AppSidebar() {
           <Button 
             variant="outline" 
             className="w-full border-neon text-neon hover:bg-neon hover:text-deep-dark transition-all duration-200"
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/configuracoes')}
           >
-            <Plus className="mr-2 h-4 w-4" /> Nova Tarefa
+            <Settings className="mr-2 h-4 w-4" /> Configurações
           </Button>
         </div>
       </SidebarFooter>
