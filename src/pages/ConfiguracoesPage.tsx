@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PageHeader } from '@/components/PageHeader';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,20 +8,33 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Trash2, User, UserCog, Settings } from "lucide-react";
+import { Trash2, User, UserCog, Settings, Tag } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { CategoryManager } from '@/components/CategoryManager';
+import { saveToStorage, getFromStorage, clearStorage } from '@/utils/storage';
+
+const defaultCategories = ["Treinos", "Estudos"];
 
 export default function ConfiguracoesPage() {
   const { toast } = useToast();
   const [username, setUsername] = useState("Usuário");
   const [email, setEmail] = useState("usuario@exemplo.com");
-  
-  // Configurações de aparência
-  const [darkMode, setDarkMode] = useState(true);
+  const [categories, setCategories] = useState<string[]>(defaultCategories);
   
   // Configurações de notificações
   const [notifications, setNotifications] = useState(true);
   const [soundEffects, setSoundEffects] = useState(true);
+
+  // Carregar categorias do localStorage
+  useEffect(() => {
+    const savedCategories = getFromStorage<string[]>('categories', defaultCategories);
+    setCategories(savedCategories);
+  }, []);
+
+  // Salvar categorias no localStorage quando mudam
+  useEffect(() => {
+    saveToStorage('categories', categories);
+  }, [categories]);
 
   const handleSaveProfile = () => {
     toast({
@@ -31,20 +44,51 @@ export default function ConfiguracoesPage() {
   };
 
   const handleDeleteData = () => {
-    // Aqui implementaríamos a lógica para excluir os dados do usuário
+    clearStorage();
     toast({
       title: "Dados excluídos",
       description: "Todos os seus dados foram excluídos permanentemente.",
       variant: "destructive",
     });
+    // Recarregar a página para refletir as mudanças
+    window.location.reload();
   };
 
   const handleResetData = () => {
-    // Aqui implementaríamos a lógica para redefinir os dados do usuário
+    setCategories(defaultCategories);
+    saveToStorage('categories', defaultCategories);
     toast({
       title: "Dados redefinidos",
       description: "Todos os seus dados foram redefinidos para os valores padrão.",
     });
+  };
+
+  const handleAddCategory = (category: string) => {
+    setCategories(prev => [...prev, category]);
+  };
+
+  const handleRemoveCategory = (category: string) => {
+    setCategories(prev => prev.filter(c => c !== category));
+    
+    // Atualizar tarefas associadas a esta categoria
+    const savedTasks = getFromStorage('tasks', []);
+    const updatedTasks = savedTasks.map((task: any) => {
+      if (task.category === category) {
+        return { ...task, category: "Geral" };
+      }
+      return task;
+    });
+    saveToStorage('tasks', updatedTasks);
+    
+    // Atualizar tarefas recorrentes associadas a esta categoria
+    const savedRecurringTasks = getFromStorage('recurringTasks', []);
+    const updatedRecurringTasks = savedRecurringTasks.map((task: any) => {
+      if (task.category === category) {
+        return { ...task, category: "Geral" };
+      }
+      return task;
+    });
+    saveToStorage('recurringTasks', updatedRecurringTasks);
   };
 
   return (
@@ -61,9 +105,9 @@ export default function ConfiguracoesPage() {
             <User className="mr-2 h-4 w-4" />
             Conta
           </TabsTrigger>
-          <TabsTrigger value="aparencia">
-            <Settings className="mr-2 h-4 w-4" />
-            Aparência
+          <TabsTrigger value="categorias">
+            <Tag className="mr-2 h-4 w-4" />
+            Categorias
           </TabsTrigger>
           <TabsTrigger value="notificacoes">
             <UserCog className="mr-2 h-4 w-4" />
@@ -95,20 +139,18 @@ export default function ConfiguracoesPage() {
           </Card>
         </TabsContent>
         
-        <TabsContent value="aparencia">
+        <TabsContent value="categorias">
           <Card>
             <CardHeader>
-              <CardTitle>Preferências de Aparência</CardTitle>
-              <CardDescription>Personalize a aparência do aplicativo</CardDescription>
+              <CardTitle>Gerenciamento de Categorias</CardTitle>
+              <CardDescription>Adicione, edite ou remova categorias para organizar suas tarefas</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Modo Escuro</p>
-                  <p className="text-sm text-muted-foreground">Ativar modo escuro para toda a interface</p>
-                </div>
-                <Switch checked={darkMode} onCheckedChange={setDarkMode} />
-              </div>
+            <CardContent>
+              <CategoryManager 
+                categories={categories}
+                onAddCategory={handleAddCategory}
+                onRemoveCategory={handleRemoveCategory}
+              />
             </CardContent>
           </Card>
         </TabsContent>

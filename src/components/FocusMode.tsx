@@ -225,26 +225,26 @@ export function FocusMode({
         onClose();
       }
     }}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-[500px] mx-auto">
         <DialogHeader>
-          <DialogTitle>Modo Foco</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-center text-xl">Modo Foco</DialogTitle>
+          <DialogDescription className="text-center">
             {selectedTask ? `Tarefa: ${selectedTask.task.title}` : 'Nenhuma tarefa selecionada'}
           </DialogDescription>
         </DialogHeader>
         
-        <div className="flex flex-col items-center py-6 space-y-4">
+        <div className="flex flex-col items-center py-6 space-y-6">
           {/* Timer Display */}
           <Card className="w-full border-2 border-neon bg-deep-dark">
-            <CardContent className="flex flex-col items-center py-8">
-              <div className="text-5xl font-bold text-neon mb-4">
+            <CardContent className="flex flex-col items-center py-10">
+              <div className="text-6xl font-bold text-neon mb-4">
                 {formatTime(remainingSeconds)}
               </div>
-              <div className="text-sm text-muted-foreground">
+              <div className="text-base text-muted-foreground">
                 {phase === 'work' ? 'Tempo de trabalho' : phase === 'break' ? 'Tempo de descanso' : 'Pronto para começar?'}
               </div>
               {totalFocusTime > 0 && (
-                <div className="mt-2 text-xs text-muted-foreground">
+                <div className="mt-4 text-sm text-muted-foreground">
                   Tempo total de foco: {Math.floor(totalFocusTime / 60)} minutos
                 </div>
               )}
@@ -252,18 +252,33 @@ export function FocusMode({
           </Card>
           
           {/* Timer Controls */}
-          <div className="flex justify-center space-x-4 w-full">
+          <div className="flex justify-center gap-4 w-full">
             {!isRunning ? (
-              <Button onClick={startTimer} variant="default" size="lg" className="w-1/3">
+              <Button 
+                onClick={startTimer} 
+                variant="default" 
+                size="lg" 
+                className="w-1/3 py-6"
+              >
                 <Play className="mr-2" /> Iniciar
               </Button>
             ) : (
-              <Button onClick={pauseTimer} variant="secondary" size="lg" className="w-1/3">
+              <Button 
+                onClick={pauseTimer} 
+                variant="secondary" 
+                size="lg" 
+                className="w-1/3 py-6"
+              >
                 <Pause className="mr-2" /> Pausar
               </Button>
             )}
             
-            <Button onClick={stopTimer} variant="destructive" size="lg" className="w-1/3">
+            <Button 
+              onClick={stopTimer} 
+              variant="destructive" 
+              size="lg" 
+              className="w-1/3 py-6"
+            >
               <CircleStop className="mr-2" /> Encerrar
             </Button>
           </div>
@@ -271,61 +286,67 @@ export function FocusMode({
           {/* Timer Settings */}
           <Card className="w-full">
             <CardHeader className="pb-2">
-              <CardTitle>Configurações</CardTitle>
+              <CardTitle className="text-center">Configurações</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center">
-                  <Clock size={16} className="mr-2" />
-                  <span>Trabalho:</span>
+            <CardContent className="space-y-4">
+              <div className="flex flex-col space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center">
+                      <Clock size={18} className="mr-2" />
+                      <span>Trabalho:</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      {[15, 25, 30, 45, 60].map((min) => (
+                        <Button
+                          key={min}
+                          variant={settings.workMinutes === min ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => {
+                            setSettings(prev => ({ ...prev, workMinutes: min }));
+                            if (phase === 'idle' || phase === 'work') {
+                              setRemainingSeconds(min * 60);
+                            }
+                          }}
+                        >
+                          {min}m
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  {[15, 25, 30, 45, 60].map((min) => (
-                    <Button
-                      key={min}
-                      variant={settings.workMinutes === min ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => {
-                        setSettings(prev => ({ ...prev, workMinutes: min }));
-                        if (phase === 'idle' || phase === 'work') {
-                          setRemainingSeconds(min * 60);
-                        }
-                      }}
-                    >
-                      {min}m
-                    </Button>
-                  ))}
-                </div>
-              </div>
-              
-              <div className="flex justify-between items-center">
-                <div className="flex items-center">
-                  <Timer size={16} className="mr-2" />
-                  <span>Descanso:</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  {[5, 10, 15].map((min) => (
-                    <Button
-                      key={min}
-                      variant={settings.breakMinutes === min ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => {
-                        setSettings(prev => ({ ...prev, breakMinutes: min }));
-                        if (phase === 'break') {
-                          setRemainingSeconds(min * 60);
-                        }
-                      }}
-                    >
-                      {min}m
-                    </Button>
-                  ))}
+                
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center">
+                      <Timer size={18} className="mr-2" />
+                      <span>Descanso:</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      {[5, 10, 15].map((min) => (
+                        <Button
+                          key={min}
+                          variant={settings.breakMinutes === min ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => {
+                            setSettings(prev => ({ ...prev, breakMinutes: min }));
+                            if (phase === 'break') {
+                              setRemainingSeconds(min * 60);
+                            }
+                          }}
+                        >
+                          {min}m
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
         
-        <DialogFooter className="sm:justify-start">
+        <DialogFooter className="justify-center mt-4">
           <Button
             type="button"
             variant="outline"
@@ -335,6 +356,7 @@ export function FocusMode({
               }
               onClose();
             }}
+            className="w-full"
           >
             Fechar
           </Button>
@@ -360,9 +382,11 @@ export function FocusMode({
             />
           )}
           
-          <DialogFooter>
+          <DialogFooter className="flex justify-between">
             <Button variant="outline" onClick={skipCompletion}>Não</Button>
-            <Button onClick={completeTask} className="bg-green-600 hover:bg-green-500">Sim, Concluir</Button>
+            <Button onClick={completeTask} className="bg-green-600 hover:bg-green-500">
+              Sim, Concluir
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

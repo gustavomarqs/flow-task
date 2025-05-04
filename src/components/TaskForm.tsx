@@ -10,6 +10,7 @@ import { RecurringTask } from '@/types/recurring-task';
 import { v4 as uuidv4 } from 'uuid';
 import { CategoryBadge } from './CategoryBadge';
 import { Switch } from "@/components/ui/switch";
+import { Plus } from 'lucide-react';
 
 interface TaskFormProps {
   isOpen: boolean;
@@ -64,22 +65,25 @@ export function TaskForm({
       const today = new Date().toISOString().split('T')[0];
       setTitle("");
       setDescription("");
-      setCategory("Treinos");
+      setCategory(categories.length > 0 ? categories[0] : "Geral");
       setDate(today);
       setTime("");
       setIsRecurring(false);
     }
-  }, [editTask, editRecurringTask, isOpen]);
+  }, [editTask, editRecurringTask, isOpen, categories]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Garantir que a categoria exista ou usar "Geral"
+    const finalCategory = categories.includes(category) ? category : "Geral";
     
     if (isRecurring) {
       const taskData: RecurringTask = {
         id: editRecurringTask?.id || uuidv4(),
         title,
         description,
-        category,
+        category: finalCategory,
         active: editRecurringTask?.active !== undefined ? editRecurringTask.active : true,
         createdAt: editRecurringTask?.createdAt || new Date().toISOString(),
       };
@@ -90,7 +94,7 @@ export function TaskForm({
         id: editTask?.id || uuidv4(),
         title,
         description,
-        category,
+        category: finalCategory,
         date,
         time,
         completed: editTask?.completed || false,
@@ -113,6 +117,7 @@ export function TaskForm({
   };
 
   const isEditing = !!editTask || !!editRecurringTask;
+  const availableCategories = categories.length > 0 ? categories : ["Geral"];
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -150,7 +155,7 @@ export function TaskForm({
           <div className="space-y-2">
             <Label>Categoria</Label>
             <div className="flex flex-wrap gap-2 mb-2">
-              {categories.map((cat) => (
+              {availableCategories.map((cat) => (
                 <div 
                   key={cat}
                   onClick={() => setCategory(cat)}
@@ -165,8 +170,9 @@ export function TaskForm({
                   variant="outline" 
                   size="sm"
                   onClick={() => setShowNewCategory(true)}
+                  className="flex items-center"
                 >
-                  + Nova Categoria
+                  <Plus size={16} className="mr-1" /> Nova Categoria
                 </Button>
               )}
             </div>

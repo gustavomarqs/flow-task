@@ -10,13 +10,12 @@ import { Task } from '@/types/task';
 import { RecurringTask, RecurringTaskEntry } from '@/types/recurring-task';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UnifiedTaskList } from '@/components/UnifiedTaskList';
-
-const defaultCategories = ["Treinos", "Estudos"];
+import { getFromStorage, saveToStorage } from '@/utils/storage';
 
 export default function TasksPage() {
   // Regular tasks state
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [categories, setCategories] = useState<string[]>(defaultCategories);
+  const [categories, setCategories] = useState<string[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   
@@ -41,45 +40,41 @@ export default function TasksPage() {
   // Load data from localStorage
   useEffect(() => {
     // Load tasks
-    const savedTasks = localStorage.getItem('tasks');
-    if (savedTasks) {
-      setTasks(JSON.parse(savedTasks));
+    const savedTasks = getFromStorage('tasks', []);
+    if (savedTasks.length > 0) {
+      setTasks(savedTasks);
     }
     
     // Load categories
-    const savedCategories = localStorage.getItem('categories');
-    if (savedCategories) {
-      setCategories(JSON.parse(savedCategories));
+    const savedCategories = getFromStorage('categories', ["Treinos", "Estudos"]);
+    if (savedCategories.length > 0) {
+      setCategories(savedCategories);
     }
     
     // Load recurring tasks
-    const savedRecurringTasks = localStorage.getItem('recurringTasks');
-    if (savedRecurringTasks) {
-      setRecurringTasks(JSON.parse(savedRecurringTasks));
+    const savedRecurringTasks = getFromStorage('recurringTasks', []);
+    if (savedRecurringTasks.length > 0) {
+      setRecurringTasks(savedRecurringTasks);
     }
     
     // Load task entries
-    const savedEntries = localStorage.getItem('taskEntries');
-    if (savedEntries) {
-      setTaskEntries(JSON.parse(savedEntries));
+    const savedEntries = getFromStorage('taskEntries', []);
+    if (savedEntries.length > 0) {
+      setTaskEntries(savedEntries);
     }
   }, []);
 
   // Save to localStorage whenever data changes
   useEffect(() => {
-    localStorage.setItem('tasks', JSON.stringify(tasks));
+    saveToStorage('tasks', tasks);
   }, [tasks]);
 
   useEffect(() => {
-    localStorage.setItem('categories', JSON.stringify(categories));
-  }, [categories]);
-
-  useEffect(() => {
-    localStorage.setItem('recurringTasks', JSON.stringify(recurringTasks));
+    saveToStorage('recurringTasks', recurringTasks);
   }, [recurringTasks]);
 
   useEffect(() => {
-    localStorage.setItem('taskEntries', JSON.stringify(taskEntries));
+    saveToStorage('taskEntries', taskEntries);
   }, [taskEntries]);
 
   // Task handlers
