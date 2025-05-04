@@ -56,10 +56,22 @@
     @apply bg-deep-dark text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
+  
+  h1 {
+    @apply text-2xl font-bold tracking-tight;
+  }
+  
+  h2 {
+    @apply text-xl font-semibold tracking-tight;
+  }
+  
+  h3 {
+    @apply text-lg font-medium;
+  }
 }
 
 .neon-border {
-  @apply border border-neon rounded-md relative overflow-hidden;
+  @apply border border-neon rounded-lg relative overflow-hidden shadow-md;
   box-shadow: 0 0 5px rgba(10, 255, 242, 0.3), inset 0 0 5px rgba(10, 255, 242, 0.1);
 }
 
@@ -70,5 +82,19 @@
 }
 
 .glass-card {
-  @apply bg-opacity-10 backdrop-filter backdrop-blur-sm bg-medium-gray;
+  @apply bg-opacity-10 backdrop-filter backdrop-blur-sm bg-medium-gray shadow-md;
+}
+
+@layer utilities {
+  .hover-scale {
+    @apply transition-transform duration-200 hover:scale-105;
+  }
+  
+  .scale-102 {
+    scale: 1.02;
+  }
+  
+  .scale-105 {
+    scale: 1.05;
+  }
 }

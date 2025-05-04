@@ -72,17 +72,17 @@ export function RecurringTaskCard({
   };
 
   return (
-    <Card className="mb-4 neon-border hover:animate-pulse-glow transition-all bg-gradient-to-r from-dark-gray to-indigo-900/20">
-      <CardHeader className="pb-2">
+    <Card className="mb-6 neon-border hover:animate-pulse-glow transition-all bg-gradient-to-r from-zinc-900 to-indigo-900/20">
+      <CardHeader className="pb-3 pt-6">
         <div className="flex justify-between items-start">
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <RepeatIcon size={16} className="text-blue-400" />
-              <CardTitle className={todaysEntry?.completed ? "line-through text-gray-400" : ""}>
+              <RepeatIcon size={18} className="text-cyan-400" />
+              <CardTitle className={`text-xl ${todaysEntry?.completed ? "line-through text-gray-400" : ""}`}>
                 {task.title}
               </CardTitle>
             </div>
-            <CardDescription className="flex items-center mt-1 text-gray-400">
+            <CardDescription className="flex items-center mt-2 text-gray-400">
               Tarefa recorrente diária
             </CardDescription>
           </div>
@@ -91,7 +91,7 @@ export function RecurringTaskCard({
       </CardHeader>
       
       {task.description && (
-        <CardContent className="py-2">
+        <CardContent className="py-3">
           <p className="text-sm text-gray-300">
             {task.description}
           </p>
@@ -99,16 +99,18 @@ export function RecurringTaskCard({
       )}
       
       {showDetailsInput && (
-        <CardContent className="pt-0 pb-3">
-          <div className="space-y-2">
+        <CardContent className="pt-0 pb-4">
+          <div className="space-y-3">
             <Textarea
               placeholder="Adicione detalhes sobre o que você fez hoje..."
               value={details}
               onChange={(e) => setDetails(e.target.value)}
-              className="bg-medium-gray"
+              className="bg-zinc-800 border-zinc-700 focus:ring-cyan-500 focus:border-cyan-500"
             />
             <div className="flex justify-end">
-              <Button size="sm" onClick={saveDetails}>
+              <Button size="sm" 
+                className="bg-cyan-700 hover:bg-cyan-600 transition-all duration-200 hover:scale-105"
+                onClick={saveDetails}>
                 Salvar Detalhes
               </Button>
             </div>
@@ -117,18 +119,18 @@ export function RecurringTaskCard({
       )}
       
       {todaysEntry?.details && !showDetailsInput && (
-        <CardContent className="py-2">
-          <div className="bg-dark-gray p-2 rounded-md">
+        <CardContent className="py-3">
+          <div className="bg-zinc-800 p-4 rounded-md shadow-inner">
             <p className="text-sm italic text-gray-300">"{todaysEntry.details}"</p>
           </div>
         </CardContent>
       )}
       
-      <CardFooter className="pt-2 flex justify-end space-x-2">
+      <CardFooter className="pt-3 pb-4 flex justify-end space-x-2">
         <Button 
           size="sm" 
           variant="ghost" 
-          className="text-red-500 hover:text-red-400 hover:bg-red-400/10"
+          className="text-red-500 hover:text-red-400 hover:bg-red-400/10 transition-colors duration-200"
           onClick={() => onDelete(task.id)}
         >
           <Trash2 className="h-4 w-4" />
@@ -136,7 +138,7 @@ export function RecurringTaskCard({
         <Button 
           size="sm" 
           variant="ghost" 
-          className="text-blue-500 hover:text-blue-400 hover:bg-blue-400/10"
+          className="text-blue-500 hover:text-blue-400 hover:bg-blue-400/10 transition-colors duration-200"
           onClick={() => onEdit(task)}
         >
           <Edit className="h-4 w-4" />
@@ -145,7 +147,7 @@ export function RecurringTaskCard({
           size="sm"
           variant="outline"
           onClick={() => onViewHistory(task.id)}
-          className="text-yellow-500 hover:text-yellow-400"
+          className="text-yellow-500 border-yellow-500 hover:bg-yellow-500/10 transition-all duration-200 hover:scale-105"
         >
           <ChartBar className="h-4 w-4 mr-1" /> 
           Histórico
@@ -154,7 +156,7 @@ export function RecurringTaskCard({
           <Button 
             size="sm" 
             variant="outline" 
-            className="text-yellow-500 border-yellow-500 hover:bg-yellow-500/10"
+            className="text-yellow-500 border-yellow-500 hover:bg-yellow-500/10 transition-all duration-200 hover:scale-105"
             onClick={onStartFocus}
           >
             <Timer className="h-4 w-4 mr-1" /> 
@@ -164,7 +166,10 @@ export function RecurringTaskCard({
         <Button 
           size="sm" 
           variant={todaysEntry?.completed ? "outline" : "secondary"}
-          className={todaysEntry?.completed ? "text-green-500 border-green-500" : "bg-green-600 hover:bg-green-500"}
+          className={todaysEntry?.completed ? 
+            "text-green-500 border-green-500 hover:bg-green-500/10 transition-all duration-200 hover:scale-105" : 
+            "bg-cyan-700 hover:bg-cyan-600 transition-all duration-200 hover:scale-105"
+          }
           onClick={handleComplete}
         >
           <Check className="h-4 w-4 mr-1" /> 

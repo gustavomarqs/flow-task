@@ -4,10 +4,10 @@ import { Badge } from '@/components/ui/badge';
 
 // Define possible category colors
 const categoryColors: Record<string, string> = {
-  'Treinos': 'bg-green-800 hover:bg-green-700 text-white border-green-700',
+  'Treinos': 'bg-cyan-800 hover:bg-cyan-700 text-white border-cyan-700',
   'Estudos': 'bg-blue-800 hover:bg-blue-700 text-white border-blue-700',
-  'Geral': 'bg-gray-800 hover:bg-gray-700 text-white border-gray-700',
-  'default': 'bg-purple-800 hover:bg-purple-700 text-white border-purple-700',
+  'Geral': 'bg-zinc-800 hover:bg-zinc-700 text-white border-zinc-700',
+  'default': 'bg-indigo-800 hover:bg-indigo-700 text-white border-indigo-700',
 };
 
 interface CategoryBadgeProps {
@@ -20,7 +20,7 @@ export function CategoryBadge({ category, onClick }: CategoryBadgeProps) {
   
   return (
     <Badge 
-      className={`${colorClass} cursor-pointer transition-colors`}
+      className={`${colorClass} cursor-pointer transition-all duration-200 hover:scale-105`}
       onClick={onClick}
     >
       {category}

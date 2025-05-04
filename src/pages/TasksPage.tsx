@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { PageHeader } from '@/components/PageHeader';
 import { TaskForm } from '@/components/TaskForm';
@@ -11,6 +12,7 @@ import { RecurringTask, RecurringTaskEntry } from '@/types/recurring-task';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UnifiedTaskList } from '@/components/UnifiedTaskList';
 import { getFromStorage, saveToStorage } from '@/utils/storage';
+import { Search } from 'lucide-react';
 
 export default function TasksPage() {
   // Regular tasks state
@@ -220,11 +222,12 @@ export default function TasksPage() {
   };
 
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in space-y-8">
       <PageHeader 
         title="Minhas Tarefas"
         action={handleAddTask}
         actionLabel="Nova Tarefa"
+        buttonClassName="bg-cyan-600 hover:bg-cyan-700 text-white px-6 py-2 rounded-full shadow-md transition-all duration-200 hover:scale-105"
       />
       
       <WeeklyProgressCard 
@@ -232,31 +235,49 @@ export default function TasksPage() {
         categories={categories}
       />
       
-      <div className="mb-4">
-        <Input
-          placeholder="Pesquisar tarefas..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="bg-medium-gray"
-        />
+      <div className="mb-6">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+          <Input
+            placeholder="Pesquisar tarefas..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="bg-zinc-800/80 pl-10 border-zinc-700 shadow-sm focus:ring-cyan-500 focus:border-cyan-500 placeholder-gray-400"
+          />
+        </div>
       </div>
       
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-        <TabsList className="bg-dark-gray">
-          <TabsTrigger value="all">Todas</TabsTrigger>
-          <TabsTrigger value="pending">Pendentes</TabsTrigger>
-          <TabsTrigger value="completed">Concluídas</TabsTrigger>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
+        <TabsList className="bg-zinc-800/80 p-1 mb-4">
+          <TabsTrigger 
+            value="all"
+            className={`transition-all duration-200 hover:scale-105 ${activeTab === 'all' ? 'bg-cyan-700 text-white' : ''}`}
+          >
+            Todas
+          </TabsTrigger>
+          <TabsTrigger 
+            value="pending"
+            className={`transition-all duration-200 hover:scale-105 ${activeTab === 'pending' ? 'bg-cyan-700 text-white' : ''}`}
+          >
+            Pendentes
+          </TabsTrigger>
+          <TabsTrigger 
+            value="completed"
+            className={`transition-all duration-200 hover:scale-105 ${activeTab === 'completed' ? 'bg-cyan-700 text-white' : ''}`}
+          >
+            Concluídas
+          </TabsTrigger>
         </TabsList>
         
         {/* Category filters */}
-        <div className="mt-2 flex flex-wrap gap-2">
+        <div className="mt-2 flex flex-wrap gap-2 mb-4">
           {categories.map(category => (
             <button 
               key={category}
-              className={`px-3 py-1.5 text-sm rounded-sm ${
+              className={`px-3 py-1.5 text-sm rounded-md shadow-sm transition-all duration-200 hover:scale-105 ${
                 activeTab === `category-${category}` 
-                  ? 'bg-neon text-deep-dark' 
-                  : 'bg-muted text-muted-foreground'
+                  ? 'bg-cyan-600 text-white' 
+                  : 'bg-zinc-800 text-gray-300 hover:bg-zinc-700'
               }`}
               onClick={() => handleCategoryClick(category)}
             >
@@ -266,7 +287,7 @@ export default function TasksPage() {
         </div>
 
         {/* TabsContent for all tabs */}
-        <TabsContent value="all" className="mt-2">
+        <TabsContent value="all" className="mt-4">
           <UnifiedTaskList
             regularTasks={filteredTasks}
             recurringTasks={filteredRecurringTasks}
@@ -282,7 +303,7 @@ export default function TasksPage() {
           />
         </TabsContent>
         
-        <TabsContent value="pending" className="mt-2">
+        <TabsContent value="pending" className="mt-4">
           <UnifiedTaskList
             regularTasks={filteredTasks.filter(task => !task.completed)}
             recurringTasks={filteredRecurringTasks}
@@ -298,7 +319,7 @@ export default function TasksPage() {
           />
         </TabsContent>
         
-        <TabsContent value="completed" className="mt-2">
+        <TabsContent value="completed" className="mt-4">
           <UnifiedTaskList
             regularTasks={filteredTasks.filter(task => task.completed)}
             recurringTasks={[]} // Não mostramos tarefas recorrentes na aba de concluídas
@@ -315,7 +336,7 @@ export default function TasksPage() {
         </TabsContent>
         
         {categories.map(category => (
-          <TabsContent key={category} value={`category-${category}`} className="mt-2">
+          <TabsContent key={category} value={`category-${category}`} className="mt-4">
             <UnifiedTaskList
               regularTasks={filteredTasks.filter(task => task.category === category)}
               recurringTasks={filteredRecurringTasks.filter(task => task.category === category)}
