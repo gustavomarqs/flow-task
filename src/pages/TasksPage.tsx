@@ -5,14 +5,11 @@ import { TaskForm } from '@/components/TaskForm';
 import { TaskHistoryModal } from '@/components/TaskHistoryModal';
 import { WeeklyProgressCard } from '@/components/WeeklyProgressCard';
 import { FocusMode } from '@/components/FocusMode';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { SearchBar } from '@/components/SearchBar';
+import { TasksContent } from '@/components/TasksContent';
 import { Task } from '@/types/task';
 import { RecurringTask, RecurringTaskEntry } from '@/types/recurring-task';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { UnifiedTaskList } from '@/components/UnifiedTaskList';
 import { getFromStorage, saveToStorage } from '@/utils/storage';
-import { Search } from 'lucide-react';
 
 export default function TasksPage() {
   // Regular tasks state
@@ -38,7 +35,7 @@ export default function TasksPage() {
   // Filter state
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("all");
-  
+
   // Load data from localStorage
   useEffect(() => {
     // Load tasks
@@ -173,6 +170,10 @@ export default function TasksPage() {
     setIsFocusModeOpen(true);
   };
   
+  const handleCategoryClick = (category: string) => {
+    setActiveTab(`category-${category}`);
+  };
+
   // Filter tasks
   const filteredTasks = tasks.filter(task => {
     // Filter by search query
@@ -212,10 +213,6 @@ export default function TasksPage() {
     return matchesSearch;
   });
 
-  const handleCategoryClick = (category: string) => {
-    setActiveTab(`category-${category}`);
-  };
-
   // Helper function to get task entries for a specific recurring task
   const getEntriesForTask = (taskId: string) => {
     return taskEntries.filter(entry => entry.recurringTaskId === taskId);
@@ -235,124 +232,28 @@ export default function TasksPage() {
         categories={categories}
       />
       
-      <div className="mb-6">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-          <Input
-            placeholder="Pesquisar tarefas..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-zinc-800/80 pl-10 border-zinc-700 shadow-sm focus:ring-cyan-500 focus:border-cyan-500 placeholder-gray-400"
-          />
-        </div>
-      </div>
+      <SearchBar 
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+      />
       
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
-        <TabsList className="bg-zinc-800/80 p-1 mb-4">
-          <TabsTrigger 
-            value="all"
-            className={`transition-all duration-200 hover:scale-105 ${activeTab === 'all' ? 'bg-cyan-700 text-white' : ''}`}
-          >
-            Todas
-          </TabsTrigger>
-          <TabsTrigger 
-            value="pending"
-            className={`transition-all duration-200 hover:scale-105 ${activeTab === 'pending' ? 'bg-cyan-700 text-white' : ''}`}
-          >
-            Pendentes
-          </TabsTrigger>
-          <TabsTrigger 
-            value="completed"
-            className={`transition-all duration-200 hover:scale-105 ${activeTab === 'completed' ? 'bg-cyan-700 text-white' : ''}`}
-          >
-            Concluídas
-          </TabsTrigger>
-        </TabsList>
-        
-        {/* Category filters */}
-        <div className="mt-2 flex flex-wrap gap-2 mb-4">
-          {categories.map(category => (
-            <button 
-              key={category}
-              className={`px-3 py-1.5 text-sm rounded-md shadow-sm transition-all duration-200 hover:scale-105 ${
-                activeTab === `category-${category}` 
-                  ? 'bg-cyan-600 text-white' 
-                  : 'bg-zinc-800 text-gray-300 hover:bg-zinc-700'
-              }`}
-              onClick={() => handleCategoryClick(category)}
-            >
-              {category}
-            </button>
-          ))}
-        </div>
-
-        {/* TabsContent for all tabs */}
-        <TabsContent value="all" className="mt-4">
-          <UnifiedTaskList
-            regularTasks={filteredTasks}
-            recurringTasks={filteredRecurringTasks}
-            taskEntries={taskEntries}
-            onCompleteTask={handleCompleteTask}
-            onEditTask={handleEditTask}
-            onDeleteTask={handleDeleteTask}
-            onCompleteRecurringTask={handleCompleteRecurringTask}
-            onEditRecurringTask={handleEditRecurringTask}
-            onDeleteRecurringTask={handleDeleteRecurringTask}
-            onViewTaskHistory={handleViewTaskHistory}
-            onStartFocus={handleStartFocus}
-          />
-        </TabsContent>
-        
-        <TabsContent value="pending" className="mt-4">
-          <UnifiedTaskList
-            regularTasks={filteredTasks.filter(task => !task.completed)}
-            recurringTasks={filteredRecurringTasks}
-            taskEntries={taskEntries}
-            onCompleteTask={handleCompleteTask}
-            onEditTask={handleEditTask}
-            onDeleteTask={handleDeleteTask}
-            onCompleteRecurringTask={handleCompleteRecurringTask}
-            onEditRecurringTask={handleEditRecurringTask}
-            onDeleteRecurringTask={handleDeleteRecurringTask}
-            onViewTaskHistory={handleViewTaskHistory}
-            onStartFocus={handleStartFocus}
-          />
-        </TabsContent>
-        
-        <TabsContent value="completed" className="mt-4">
-          <UnifiedTaskList
-            regularTasks={filteredTasks.filter(task => task.completed)}
-            recurringTasks={[]} // Não mostramos tarefas recorrentes na aba de concluídas
-            taskEntries={taskEntries}
-            onCompleteTask={handleCompleteTask}
-            onEditTask={handleEditTask}
-            onDeleteTask={handleDeleteTask}
-            onCompleteRecurringTask={handleCompleteRecurringTask}
-            onEditRecurringTask={handleEditRecurringTask}
-            onDeleteRecurringTask={handleDeleteRecurringTask}
-            onViewTaskHistory={handleViewTaskHistory}
-            onStartFocus={handleStartFocus}
-          />
-        </TabsContent>
-        
-        {categories.map(category => (
-          <TabsContent key={category} value={`category-${category}`} className="mt-4">
-            <UnifiedTaskList
-              regularTasks={filteredTasks.filter(task => task.category === category)}
-              recurringTasks={filteredRecurringTasks.filter(task => task.category === category)}
-              taskEntries={taskEntries}
-              onCompleteTask={handleCompleteTask}
-              onEditTask={handleEditTask}
-              onDeleteTask={handleDeleteTask}
-              onCompleteRecurringTask={handleCompleteRecurringTask}
-              onEditRecurringTask={handleEditRecurringTask}
-              onDeleteRecurringTask={handleDeleteRecurringTask}
-              onViewTaskHistory={handleViewTaskHistory}
-              onStartFocus={handleStartFocus}
-            />
-          </TabsContent>
-        ))}
-      </Tabs>
+      <TasksContent 
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        categories={categories}
+        filteredTasks={filteredTasks}
+        filteredRecurringTasks={filteredRecurringTasks}
+        taskEntries={taskEntries}
+        onCategoryClick={handleCategoryClick}
+        onCompleteTask={handleCompleteTask}
+        onEditTask={handleEditTask}
+        onDeleteTask={handleDeleteTask}
+        onCompleteRecurringTask={handleCompleteRecurringTask}
+        onEditRecurringTask={handleEditRecurringTask}
+        onDeleteRecurringTask={handleDeleteRecurringTask}
+        onViewTaskHistory={handleViewTaskHistory}
+        onStartFocus={handleStartFocus}
+      />
       
       {/* Forms and modals */}
       <TaskForm 

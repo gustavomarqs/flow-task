@@ -6,10 +6,11 @@ import { Plus } from 'lucide-react';
 
 interface PageHeaderProps {
   title: string;
-  description?: string; // Added description as optional prop
+  description?: string;
   action?: () => void;
   actionLabel?: string;
   showAddButton?: boolean;
+  buttonClassName?: string; // Added buttonClassName prop
 }
 
 export function PageHeader({ 
@@ -17,7 +18,8 @@ export function PageHeader({
   description,
   action, 
   actionLabel = "Adicionar", 
-  showAddButton = true 
+  showAddButton = true,
+  buttonClassName // Using the new prop
 }: PageHeaderProps) {
   const { toast } = useToast();
   
@@ -41,7 +43,7 @@ export function PageHeader({
         {showAddButton && (
           <Button
             onClick={handleAction}
-            className="bg-neon text-deep-dark hover:bg-neon-glow transition-all duration-200"
+            className={buttonClassName || "bg-neon text-deep-dark hover:bg-neon-glow transition-all duration-200"}
           >
             <Plus className="mr-2 h-4 w-4" />
             {actionLabel}
