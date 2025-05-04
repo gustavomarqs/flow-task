@@ -9,12 +9,13 @@ import { SearchBar } from '@/components/SearchBar';
 import { TasksContent } from '@/components/TasksContent';
 import { Task } from '@/types/task';
 import { RecurringTask, RecurringTaskEntry } from '@/types/recurring-task';
-import { getFromStorage, saveToStorage } from '@/utils/storage';
+import { getFromStorage, saveToStorage, getCategoryColors } from '@/utils/storage';
 
 export default function TasksPage() {
   // Regular tasks state
   const [tasks, setTasks] = useState<Task[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
+  const [categoryColors, setCategoryColors] = useState<Record<string, string>>({});
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   
@@ -48,6 +49,10 @@ export default function TasksPage() {
     const savedCategories = getFromStorage('categories', ["Treinos", "Estudos"]);
     if (savedCategories.length > 0) {
       setCategories(savedCategories);
+      
+      // Load category colors
+      const colors = getCategoryColors(savedCategories);
+      setCategoryColors(colors);
     }
     
     // Load recurring tasks
@@ -75,6 +80,12 @@ export default function TasksPage() {
   useEffect(() => {
     saveToStorage('taskEntries', taskEntries);
   }, [taskEntries]);
+
+  useEffect(() => {
+    // Update category colors when categories change
+    const colors = getCategoryColors(categories);
+    setCategoryColors(colors);
+  }, [categories]);
 
   // Task handlers
   const handleAddTask = () => {
@@ -230,6 +241,7 @@ export default function TasksPage() {
       <WeeklyProgressCard 
         entries={taskEntries} 
         categories={categories}
+        categoryColors={categoryColors}
       />
       
       <SearchBar 
@@ -244,6 +256,7 @@ export default function TasksPage() {
         filteredTasks={filteredTasks}
         filteredRecurringTasks={filteredRecurringTasks}
         taskEntries={taskEntries}
+        categoryColors={categoryColors}
         onCategoryClick={handleCategoryClick}
         onCompleteTask={handleCompleteTask}
         onEditTask={handleEditTask}
@@ -280,6 +293,7 @@ export default function TasksPage() {
         onClose={() => setIsFocusModeOpen(false)}
         onCompleteTask={handleCompleteTask}
         onCompleteRecurringTask={handleCompleteRecurringTask}
+        categoryColors={categoryColors}
       />
     </div>
   );

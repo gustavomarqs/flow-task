@@ -9,6 +9,7 @@ interface UnifiedTaskListProps {
   regularTasks: Task[];
   recurringTasks: RecurringTask[];
   taskEntries: RecurringTaskEntry[];
+  categoryColors?: Record<string, string>;
   onCompleteTask: (id: string) => void;
   onEditTask: (task: Task) => void;
   onDeleteTask: (id: string) => void;
@@ -23,6 +24,7 @@ export function UnifiedTaskList({
   regularTasks,
   recurringTasks,
   taskEntries,
+  categoryColors = {},
   onCompleteTask,
   onEditTask,
   onDeleteTask,
@@ -90,6 +92,7 @@ export function UnifiedTaskList({
             <TaskCard
               key={`regular-${task.id}`}
               task={task}
+              categoryColors={categoryColors}
               onComplete={onCompleteTask}
               onEdit={onEditTask}
               onDelete={onDeleteTask}
@@ -106,6 +109,7 @@ export function UnifiedTaskList({
               key={`recurring-${task.id}`}
               task={task}
               todaysEntry={getTodaysEntryForTask(task.id)}
+              categoryColor={categoryColors[task.category]}
               onComplete={onCompleteRecurringTask}
               onEdit={onEditRecurringTask}
               onDelete={onDeleteRecurringTask}

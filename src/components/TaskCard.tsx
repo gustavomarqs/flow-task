@@ -20,11 +20,14 @@ interface TaskCardProps {
   onEdit: (task: Task) => void;
   onDelete: (id: string) => void;
   onStartFocus?: () => void;
+  categoryColors?: Record<string, string>;
 }
 
-export function TaskCard({ task, onComplete, onEdit, onDelete, onStartFocus }: TaskCardProps) {
+export function TaskCard({ task, onComplete, onEdit, onDelete, onStartFocus, categoryColors = {} }: TaskCardProps) {
+  const categoryColor = categoryColors[task.category];
+  
   return (
-    <Card className={`mb-6 neon-border hover:animate-pulse-glow transition-all bg-zinc-900/70 ${task.completed ? 'opacity-60' : ''}`}>
+    <Card className={`mb-6 neon-border hover:animate-pulse-glow transition-all bg-zinc-900/70 rounded-2xl shadow-md ${task.completed ? 'opacity-60' : ''}`}>
       <CardHeader className="pb-3 pt-6">
         <div className="flex justify-between items-start">
           <div className="flex-1">
@@ -36,7 +39,7 @@ export function TaskCard({ task, onComplete, onEdit, onDelete, onStartFocus }: T
               {task.time && ` • ${task.time}`}
             </CardDescription>
           </div>
-          <CategoryBadge category={task.category} />
+          <CategoryBadge category={task.category} color={categoryColor} />
         </div>
       </CardHeader>
       

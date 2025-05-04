@@ -44,3 +44,27 @@ export function clearStorage(): void {
     console.error('Erro ao limpar localStorage:', error);
   }
 }
+
+/**
+ * Obtém cores das categorias ou retorna valores padrão
+ */
+export function getCategoryColors(categories: string[]): Record<string, string> {
+  const defaultColors = [
+    '#06b6d4', // cyan
+    '#3b82f6', // blue
+    '#8b5cf6', // purple
+    '#10b981', // green
+    '#f59e0b', // amber
+    '#ef4444', // red
+  ];
+  
+  const savedColors = getFromStorage<Record<string, string>>('categoryColors', {});
+  const result: Record<string, string> = {};
+  
+  // Set a color for each category, using saved color or default
+  categories.forEach((category, index) => {
+    result[category] = savedColors[category] || defaultColors[index % defaultColors.length];
+  });
+  
+  return result;
+}

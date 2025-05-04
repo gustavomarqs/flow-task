@@ -1,15 +1,14 @@
 
 import React from 'react';
-import { TabsContent } from "@/components/ui/tabs";
-import { UnifiedTaskList } from '@/components/UnifiedTaskList';
 import { Task } from '@/types/task';
 import { RecurringTask, RecurringTaskEntry } from '@/types/recurring-task';
+import { UnifiedTaskList } from './UnifiedTaskList';
 
 interface TaskTabContentProps {
-  tabValue: string;
   regularTasks: Task[];
   recurringTasks: RecurringTask[];
   taskEntries: RecurringTaskEntry[];
+  categoryColors?: Record<string, string>;
   onCompleteTask: (id: string) => void;
   onEditTask: (task: Task) => void;
   onDeleteTask: (id: string) => void;
@@ -21,10 +20,10 @@ interface TaskTabContentProps {
 }
 
 export function TaskTabContent({
-  tabValue,
   regularTasks,
   recurringTasks,
   taskEntries,
+  categoryColors = {},
   onCompleteTask,
   onEditTask,
   onDeleteTask,
@@ -35,11 +34,12 @@ export function TaskTabContent({
   onStartFocus
 }: TaskTabContentProps) {
   return (
-    <TabsContent value={tabValue} className="mt-4">
+    <div className="space-y-4">
       <UnifiedTaskList
         regularTasks={regularTasks}
         recurringTasks={recurringTasks}
         taskEntries={taskEntries}
+        categoryColors={categoryColors}
         onCompleteTask={onCompleteTask}
         onEditTask={onEditTask}
         onDeleteTask={onDeleteTask}
@@ -49,6 +49,6 @@ export function TaskTabContent({
         onViewTaskHistory={onViewTaskHistory}
         onStartFocus={onStartFocus}
       />
-    </TabsContent>
+    </div>
   );
 }

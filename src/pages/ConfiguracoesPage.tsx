@@ -11,7 +11,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Trash2, User, UserCog, Settings, Tag } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { CategoryManager } from '@/components/CategoryManager';
-import { saveToStorage, getFromStorage, clearStorage } from '@/utils/storage';
+import { saveToStorage, getFromStorage, clearStorage, getCategoryColors } from '@/utils/storage';
 
 const defaultCategories = ["Treinos", "Estudos"];
 
@@ -20,21 +20,31 @@ export default function ConfiguracoesPage() {
   const [username, setUsername] = useState("Usuário");
   const [email, setEmail] = useState("usuario@exemplo.com");
   const [categories, setCategories] = useState<string[]>(defaultCategories);
+  const [categoryColors, setCategoryColors] = useState<Record<string, string>>({});
   
   // Configurações de notificações
   const [notifications, setNotifications] = useState(true);
   const [soundEffects, setSoundEffects] = useState(true);
 
-  // Carregar categorias do localStorage
+  // Carregar categorias e cores do localStorage
   useEffect(() => {
     const savedCategories = getFromStorage<string[]>('categories', defaultCategories);
     setCategories(savedCategories);
+    
+    // Load category colors
+    const colors = getCategoryColors(savedCategories);
+    setCategoryColors(colors);
   }, []);
 
   // Salvar categorias no localStorage quando mudam
   useEffect(() => {
     saveToStorage('categories', categories);
   }, [categories]);
+
+  // Salvar cores das categorias quando mudam
+  useEffect(() => {
+    saveToStorage('categoryColors', categoryColors);
+  }, [categoryColors]);
 
   const handleSaveProfile = () => {
     toast({
@@ -56,19 +66,29 @@ export default function ConfiguracoesPage() {
 
   const handleResetData = () => {
     setCategories(defaultCategories);
+    const defaultColors = getCategoryColors(defaultCategories);
+    setCategoryColors(defaultColors);
     saveToStorage('categories', defaultCategories);
+    saveToStorage('categoryColors', defaultColors);
+    
     toast({
       title: "Dados redefinidos",
       description: "Todos os seus dados foram redefinidos para os valores padrão.",
     });
   };
 
-  const handleAddCategory = (category: string) => {
+  const handleAddCategory = (category: string, color: string) => {
     setCategories(prev => [...prev, category]);
+    setCategoryColors(prev => ({...prev, [category]: color}));
   };
 
   const handleRemoveCategory = (category: string) => {
     setCategories(prev => prev.filter(c => c !== category));
+    
+    // Remove color for this category
+    const updatedColors = {...categoryColors};
+    delete updatedColors[category];
+    setCategoryColors(updatedColors);
     
     // Atualizar tarefas associadas a esta categoria
     const savedTasks = getFromStorage('tasks', []);
@@ -91,16 +111,20 @@ export default function ConfiguracoesPage() {
     saveToStorage('recurringTasks', updatedRecurringTasks);
   };
 
+  const handleUpdateCategoryColor = (category: string, color: string) => {
+    setCategoryColors(prev => ({...prev, [category]: color}));
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       <PageHeader 
         title="Configurações" 
         description="Gerencie suas preferências e dados"
         showAddButton={false} 
       />
       
-      <Tabs defaultValue="conta" className="w-full">
-        <TabsList className="grid grid-cols-4 mb-8">
+      <Tabs defaultValue="categorias" className="w-full">
+        <TabsList className="grid grid-cols-3 mb-8">
           <TabsTrigger value="conta">
             <User className="mr-2 h-4 w-4" />
             Conta
@@ -109,10 +133,6 @@ export default function ConfiguracoesPage() {
             <Tag className="mr-2 h-4 w-4" />
             Categorias
           </TabsTrigger>
-          <TabsTrigger value="notificacoes">
-            <UserCog className="mr-2 h-4 w-4" />
-            Notificações
-          </TabsTrigger>
           <TabsTrigger value="dados">
             <Trash2 className="mr-2 h-4 w-4" />
             Gerenciamento de Dados
@@ -120,87 +140,78 @@ export default function ConfiguracoesPage() {
         </TabsList>
         
         <TabsContent value="conta">
-          <Card>
-            <CardHeader>
-              <CardTitle>Informações da Conta</CardTitle>
+          <Card className="bg-zinc-900/90 rounded-2xl shadow-md">
+            <CardHeader className="pb-2 pt-6">
+              <CardTitle className="text-xl font-bold text-white/90">Informações da Conta</CardTitle>
               <CardDescription>Atualize suas informações pessoais</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 p-6">
               <div className="space-y-2">
                 <Label htmlFor="username">Nome de usuário</Label>
-                <Input id="username" value={username} onChange={(e) => setUsername(e.target.value)} />
+                <Input id="username" value={username} onChange={(e) => setUsername(e.target.value)} className="bg-zinc-800" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="bg-zinc-800" />
               </div>
-              <Button onClick={handleSaveProfile}>Salvar alterações</Button>
+              <Button 
+                onClick={handleSaveProfile}
+                className="mt-2 bg-cyan-700 hover:bg-cyan-600 text-white transition-all duration-200 hover:scale-[1.02]"
+              >
+                Salvar alterações
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>
         
         <TabsContent value="categorias">
-          <Card>
-            <CardHeader>
-              <CardTitle>Gerenciamento de Categorias</CardTitle>
+          <Card className="bg-zinc-900/90 rounded-2xl shadow-md">
+            <CardHeader className="pb-2 pt-6">
+              <CardTitle className="text-xl font-bold text-white/90">Gerenciamento de Categorias</CardTitle>
               <CardDescription>Adicione, edite ou remova categorias para organizar suas tarefas</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-6">
               <CategoryManager 
                 categories={categories}
+                categoryColors={categoryColors}
                 onAddCategory={handleAddCategory}
                 onRemoveCategory={handleRemoveCategory}
+                onUpdateCategoryColor={handleUpdateCategoryColor}
               />
             </CardContent>
           </Card>
         </TabsContent>
         
-        <TabsContent value="notificacoes">
-          <Card>
-            <CardHeader>
-              <CardTitle>Configurações de Notificações</CardTitle>
-              <CardDescription>Gerencie como o aplicativo te notifica</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Notificações</p>
-                  <p className="text-sm text-muted-foreground">Receba notificações sobre suas tarefas</p>
-                </div>
-                <Switch checked={notifications} onCheckedChange={setNotifications} />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Efeitos Sonoros</p>
-                  <p className="text-sm text-muted-foreground">Ativar sons para notificações e ações</p>
-                </div>
-                <Switch checked={soundEffects} onCheckedChange={setSoundEffects} />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
         <TabsContent value="dados">
-          <Card>
-            <CardHeader>
-              <CardTitle>Gerenciamento de Dados</CardTitle>
+          <Card className="bg-zinc-900/90 rounded-2xl shadow-md">
+            <CardHeader className="pb-2 pt-6">
+              <CardTitle className="text-xl font-bold text-white/90">Gerenciamento de Dados</CardTitle>
               <CardDescription>Gerencie seus dados pessoais</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6 p-6">
               <div className="space-y-4">
-                <div>
-                  <h4 className="font-medium mb-2">Exportar Dados</h4>
-                  <p className="text-sm text-muted-foreground mb-2">Baixe todas as suas tarefas, façanhas e pensamentos</p>
-                  <Button variant="outline">Exportar dados</Button>
+                <div className="p-5 bg-zinc-800/50 rounded-lg">
+                  <h4 className="font-medium mb-3">Exportar Dados</h4>
+                  <p className="text-sm text-muted-foreground mb-4">Baixe todas as suas tarefas, façanhas e pensamentos</p>
+                  <Button 
+                    variant="outline" 
+                    className="w-full bg-zinc-800 hover:bg-zinc-700 transition-all duration-200 hover:scale-[1.02]"
+                  >
+                    Exportar dados
+                  </Button>
                 </div>
                 
-                <div>
-                  <h4 className="font-medium mb-2">Redefinir Dados</h4>
-                  <p className="text-sm text-muted-foreground mb-2">Redefina todas as suas configurações para os valores padrão</p>
+                <div className="p-5 bg-zinc-800/50 rounded-lg">
+                  <h4 className="font-medium mb-3">Redefinir Dados</h4>
+                  <p className="text-sm text-muted-foreground mb-4">Redefina todas as suas configurações para os valores padrão</p>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="outline">Redefinir dados</Button>
+                      <Button 
+                        variant="outline"
+                        className="w-full bg-zinc-800 hover:bg-zinc-700 transition-all duration-200 hover:scale-[1.02]"
+                      >
+                        Redefinir dados
+                      </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
@@ -218,12 +229,17 @@ export default function ConfiguracoesPage() {
                   </AlertDialog>
                 </div>
                 
-                <div>
-                  <h4 className="font-medium mb-2 text-destructive">Excluir Dados</h4>
-                  <p className="text-sm text-muted-foreground mb-2">Exclua permanentemente todas as suas tarefas, façanhas e pensamentos</p>
+                <div className="p-5 bg-zinc-800/50 rounded-lg">
+                  <h4 className="font-medium mb-3 text-destructive">Excluir Dados</h4>
+                  <p className="text-sm text-muted-foreground mb-4">Exclua permanentemente todas as suas tarefas, façanhas e pensamentos</p>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="destructive">Excluir todos os dados</Button>
+                      <Button 
+                        variant="destructive"
+                        className="w-full transition-all duration-200 hover:scale-[1.02]"
+                      >
+                        Excluir todos os dados
+                      </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>

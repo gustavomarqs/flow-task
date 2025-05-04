@@ -1,9 +1,9 @@
 
 import React from 'react';
-import { Tabs } from '@/components/ui/tabs';
-import { TabFilters } from '@/components/TabFilters';
-import { CategoryFilters } from '@/components/CategoryFilters';
-import { TaskTabContent } from '@/components/TaskTabContent';
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { TabFilters } from './TabFilters';
+import { CategoryFilters } from './CategoryFilters';
+import { TaskTabContent } from './TaskTabContent';
 import { Task } from '@/types/task';
 import { RecurringTask, RecurringTaskEntry } from '@/types/recurring-task';
 
@@ -14,6 +14,7 @@ interface TasksContentProps {
   filteredTasks: Task[];
   filteredRecurringTasks: RecurringTask[];
   taskEntries: RecurringTaskEntry[];
+  categoryColors?: Record<string, string>;
   onCategoryClick: (category: string) => void;
   onCompleteTask: (id: string) => void;
   onEditTask: (task: Task) => void;
@@ -25,13 +26,14 @@ interface TasksContentProps {
   onStartFocus: (taskType: 'regular' | 'recurring', task: Task | RecurringTask) => void;
 }
 
-export function TasksContent({
+export function TasksContent({ 
   activeTab,
   setActiveTab,
   categories,
   filteredTasks,
   filteredRecurringTasks,
   taskEntries,
+  categoryColors = {},
   onCategoryClick,
   onCompleteTask,
   onEditTask,
@@ -43,71 +45,21 @@ export function TasksContent({
   onStartFocus
 }: TasksContentProps) {
   return (
-    <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
       <TabFilters activeTab={activeTab} />
       
       <CategoryFilters 
         categories={categories} 
-        activeTab={activeTab} 
+        activeTab={activeTab}
         onCategoryClick={onCategoryClick} 
       />
-
-      {/* All tasks tab */}
-      <TaskTabContent 
-        tabValue="all"
-        regularTasks={filteredTasks}
-        recurringTasks={filteredRecurringTasks}
-        taskEntries={taskEntries}
-        onCompleteTask={onCompleteTask}
-        onEditTask={onEditTask}
-        onDeleteTask={onDeleteTask}
-        onCompleteRecurringTask={onCompleteRecurringTask}
-        onEditRecurringTask={onEditRecurringTask}
-        onDeleteRecurringTask={onDeleteRecurringTask}
-        onViewTaskHistory={onViewTaskHistory}
-        onStartFocus={onStartFocus}
-      />
       
-      {/* Pending tasks tab */}
-      <TaskTabContent 
-        tabValue="pending"
-        regularTasks={filteredTasks.filter(task => !task.completed)}
-        recurringTasks={filteredRecurringTasks}
-        taskEntries={taskEntries}
-        onCompleteTask={onCompleteTask}
-        onEditTask={onEditTask}
-        onDeleteTask={onDeleteTask}
-        onCompleteRecurringTask={onCompleteRecurringTask}
-        onEditRecurringTask={onEditRecurringTask}
-        onDeleteRecurringTask={onDeleteRecurringTask}
-        onViewTaskHistory={onViewTaskHistory}
-        onStartFocus={onStartFocus}
-      />
-      
-      {/* Completed tasks tab */}
-      <TaskTabContent 
-        tabValue="completed"
-        regularTasks={filteredTasks.filter(task => task.completed)}
-        recurringTasks={[]} // Não mostramos tarefas recorrentes na aba de concluídas
-        taskEntries={taskEntries}
-        onCompleteTask={onCompleteTask}
-        onEditTask={onEditTask}
-        onDeleteTask={onDeleteTask}
-        onCompleteRecurringTask={onCompleteRecurringTask}
-        onEditRecurringTask={onEditRecurringTask}
-        onDeleteRecurringTask={onDeleteRecurringTask}
-        onViewTaskHistory={onViewTaskHistory}
-        onStartFocus={onStartFocus}
-      />
-      
-      {/* Category tabs */}
-      {categories.map(category => (
-        <TaskTabContent 
-          key={category}
-          tabValue={`category-${category}`}
-          regularTasks={filteredTasks.filter(task => task.category === category)}
-          recurringTasks={filteredRecurringTasks.filter(task => task.category === category)}
+      <TabsContent value="all" className="mt-0">
+        <TaskTabContent
+          regularTasks={filteredTasks}
+          recurringTasks={filteredRecurringTasks}
           taskEntries={taskEntries}
+          categoryColors={categoryColors}
           onCompleteTask={onCompleteTask}
           onEditTask={onEditTask}
           onDeleteTask={onDeleteTask}
@@ -117,6 +69,60 @@ export function TasksContent({
           onViewTaskHistory={onViewTaskHistory}
           onStartFocus={onStartFocus}
         />
+      </TabsContent>
+      
+      <TabsContent value="pending" className="mt-0">
+        <TaskTabContent
+          regularTasks={filteredTasks.filter(task => !task.completed)}
+          recurringTasks={filteredRecurringTasks}
+          taskEntries={taskEntries}
+          categoryColors={categoryColors}
+          onCompleteTask={onCompleteTask}
+          onEditTask={onEditTask}
+          onDeleteTask={onDeleteTask}
+          onCompleteRecurringTask={onCompleteRecurringTask}
+          onEditRecurringTask={onEditRecurringTask}
+          onDeleteRecurringTask={onDeleteRecurringTask}
+          onViewTaskHistory={onViewTaskHistory}
+          onStartFocus={onStartFocus}
+        />
+      </TabsContent>
+      
+      <TabsContent value="completed" className="mt-0">
+        <TaskTabContent
+          regularTasks={filteredTasks.filter(task => task.completed)}
+          recurringTasks={[]}
+          taskEntries={taskEntries}
+          categoryColors={categoryColors}
+          onCompleteTask={onCompleteTask}
+          onEditTask={onEditTask}
+          onDeleteTask={onDeleteTask}
+          onCompleteRecurringTask={onCompleteRecurringTask}
+          onEditRecurringTask={onEditRecurringTask}
+          onDeleteRecurringTask={onDeleteRecurringTask}
+          onViewTaskHistory={onViewTaskHistory}
+          onStartFocus={onStartFocus}
+        />
+      </TabsContent>
+      
+      {/* Dynamic category tabs */}
+      {categories.map(category => (
+        <TabsContent key={category} value={`category-${category}`} className="mt-0">
+          <TaskTabContent
+            regularTasks={filteredTasks.filter(task => task.category === category)}
+            recurringTasks={filteredRecurringTasks.filter(task => task.category === category)}
+            taskEntries={taskEntries}
+            categoryColors={categoryColors}
+            onCompleteTask={onCompleteTask}
+            onEditTask={onEditTask}
+            onDeleteTask={onDeleteTask}
+            onCompleteRecurringTask={onCompleteRecurringTask}
+            onEditRecurringTask={onEditRecurringTask}
+            onDeleteRecurringTask={onDeleteRecurringTask}
+            onViewTaskHistory={onViewTaskHistory}
+            onStartFocus={onStartFocus}
+          />
+        </TabsContent>
       ))}
     </Tabs>
   );
