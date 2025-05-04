@@ -11,19 +11,30 @@
   ],
   "mac": {
     "category": "public.app-category.productivity",
-    "icon": "public/favicon.ico"
+    "icon": "public/favicon.ico",
+    "target": ["dmg", "zip"],
+    "darkModeSupport": true
   },
   "win": {
     "target": [
-      "nsis"
+      "nsis",
+      "portable"
     ],
     "icon": "public/favicon.ico"
   },
   "linux": {
     "target": [
-      "AppImage"
+      "AppImage",
+      "deb",
+      "rpm"
     ],
     "category": "Productivity",
     "icon": "public/favicon.ico"
-  }
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true
+  },
+  "publish": null
 }

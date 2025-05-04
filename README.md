@@ -1,73 +1,112 @@
-# Welcome to your Lovable project
 
-## Project info
+# FlowTask - Gerenciador de Tarefas e Produtividade
 
-**URL**: https://lovable.dev/projects/502f8e7c-9d44-4356-a55b-6cf043bd920d
+FlowTask é um aplicativo desktop moderno para gerenciamento de tarefas, pensamentos e conquistas, desenvolvido para ajudar você a manter o foco e aumentar sua produtividade.
 
-## How can I edit this code?
+![FlowTask Screenshot](public/screenshot.png)
 
-There are several ways of editing your application.
+## 🚀 Tecnologias Utilizadas
 
-**Use Lovable**
+- **React** - Biblioteca para construção de interfaces
+- **TypeScript** - Tipagem estática para JavaScript
+- **Vite** - Ferramenta de build rápida
+- **Electron** - Framework para criação de aplicações desktop
+- **Tailwind CSS** - Framework CSS utilitário
+- **shadcn/ui** - Componentes de UI customizáveis
+- **React Query** - Gerenciamento de estado e requisições
+- **React Router** - Navegação entre páginas
+- **Zod** - Validação de schema
+- **Lucide React** - Ícones
+- **Recharts** - Biblioteca de gráficos
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/502f8e7c-9d44-4356-a55b-6cf043bd920d) and start prompting.
+## 📋 Funcionalidades
 
-Changes made via Lovable will be committed automatically to this repo.
+- Gerenciamento completo de tarefas
+- Modo foco para maior concentração
+- Registro de pensamentos e ideias
+- Acompanhamento de façanhas/conquistas
+- Interface intuitiva com tema neon
+- Aplicativo desktop executável
 
-**Use your preferred IDE**
+## 🔧 Instalação e Execução
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Pré-requisitos
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+- Node.js (v16 ou superior)
+- npm ou bun
 
-Follow these steps:
+### Instalação
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+```bash
+# Clonar o repositório
+git clone <url-do-repositorio>
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Entrar na pasta do projeto
+cd flowtask
 
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+# Instalar dependências
+npm install
+# ou
+bun install
 ```
 
-**Edit a file directly in GitHub**
+### Execução
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```bash
+# Modo desenvolvimento web
+npm run dev
 
-**Use GitHub Codespaces**
+# Modo desenvolvimento desktop (electron)
+npm run electron:dev
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+# Compilar versão de produção
+npm run build
 
-## What technologies are used for this project?
+# Construir executável desktop
+npm run electron:build
+```
 
-This project is built with:
+## 📱 Interface
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### Página de Tarefas
+![Tarefas](public/tarefas.png)
 
-## How can I deploy this project?
+### Modo Foco
+![Modo Foco](public/foco.png)
 
-Simply open [Lovable](https://lovable.dev/projects/502f8e7c-9d44-4356-a55b-6cf043bd920d) and click on Share -> Publish.
+### Façanhas
+![Façanhas](public/facanhas.png)
 
-## Can I connect a custom domain to my Lovable project?
+### Pensamentos
+![Pensamentos](public/pensamentos.png)
 
-Yes, you can!
+## 🔍 Estrutura do Projeto
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+```
+flowtask/
+├── electron/            # Configuração Electron
+├── public/              # Arquivos estáticos
+├── src/
+│   ├── components/      # Componentes reutilizáveis
+│   ├── hooks/           # Custom hooks
+│   ├── lib/             # Utilitários
+│   ├── pages/           # Páginas
+│   ├── types/           # Definições de tipos TypeScript
+│   └── utils/           # Funções auxiliares
+├── README.md            # Documentação do projeto
+└── package.json         # Dependências
+```
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## 🧪 Scripts Disponíveis
+
+- `dev`: Inicia o servidor de desenvolvimento
+- `build`: Compila o projeto para produção
+- `lint`: Executa a verificação de linting
+- `format`: Formata o código-fonte
+- `electron:dev`: Inicia o Electron em modo desenvolvimento
+- `electron:build`: Cria executáveis para desktop
+
+## 📄 Licença
+
+Este projeto está licenciado sob a licença MIT - consulte o arquivo LICENSE para obter detalhes.
+
