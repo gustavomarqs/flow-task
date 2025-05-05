@@ -1,6 +1,6 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HashRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import MainLayout from "./components/MainLayout";
 import TasksPage from "./pages/TasksPage";
@@ -15,7 +15,7 @@ import { ProtectedRoute } from "./auth/ProtectedRoute";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <BrowserRouter>
+  <HashRouter>
     <AuthProvider>
       <QueryClientProvider client={queryClient}>
         <Routes>
@@ -36,7 +36,7 @@ const App = () => (
         <Toaster />
       </QueryClientProvider>
     </AuthProvider>
-  </BrowserRouter>
+  </HashRouter>
 );
 
 export default App;
