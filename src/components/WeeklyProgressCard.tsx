@@ -2,6 +2,7 @@
 import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RecurringTaskEntry } from '@/types/recurring-task';
+import { Task } from '@/types/task';
 import { Progress } from '@/components/ui/progress';
 import {
   ChartContainer,
@@ -14,11 +15,12 @@ import { ptBR } from 'date-fns/locale';
 
 interface WeeklyProgressCardProps {
   entries: RecurringTaskEntry[];
+  tasks: Task[];
   categories: string[];
   categoryColors?: Record<string, string>;
 }
 
-export function WeeklyProgressCard({ entries, categories, categoryColors = {} }: WeeklyProgressCardProps) {
+export function WeeklyProgressCard({ entries, tasks, categories, categoryColors = {} }: WeeklyProgressCardProps) {
   // Get current week's date range
   const now = new Date();
   const weekStart = startOfWeek(now, { weekStartsOn: 0 });
@@ -43,34 +45,65 @@ export function WeeklyProgressCard({ entries, categories, categoryColors = {} }:
       return entryDate >= weekStart && entryDate <= weekEnd;
     });
     
+    // Filter tasks for the current week
+    const filteredTasks = tasks.filter(task => {
+      const taskDate = new Date(task.date);
+      return taskDate >= weekStart && taskDate <= weekEnd;
+    });
+    
+    // Combine recurring task entries and regular tasks for total count
+    const totalRecurringEntries = filteredEntries.length;
+    const totalRegularTasks = filteredTasks.length;
+    const total = totalRecurringEntries + totalRegularTasks;
+    
+    // Count completed tasks
+    const completedRecurringEntries = filteredEntries.filter(entry => entry.completed).length;
+    const completedRegularTasks = filteredTasks.filter(task => task.completed).length;
+    const completed = completedRecurringEntries + completedRegularTasks;
+    
     // Calculate completion rate
-    const total = filteredEntries.length;
-    const completed = filteredEntries.filter(entry => entry.completed).length;
     const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
     
     // Calculate tasks per day
     const byDay = weekDates.map(date => {
+      // Recurring task entries for this day
       const dayEntries = filteredEntries.filter(entry => 
         isSameDay(new Date(entry.date), date)
       );
       
+      // Regular tasks for this day
+      const dayTasks = filteredTasks.filter(task =>
+        isSameDay(new Date(task.date), date)
+      );
+      
       return {
         date,
-        total: dayEntries.length,
-        completed: dayEntries.filter(entry => entry.completed).length
+        total: dayEntries.length + dayTasks.length,
+        completed: dayEntries.filter(entry => entry.completed).length + 
+                   dayTasks.filter(task => task.completed).length
       };
     });
     
-    // Calculate most active categories
+    // Calculate category distribution
     const categoryCounts: Record<string, number> = {};
+    
+    // Count recurring task entries by category
     filteredEntries
       .filter(entry => entry.completed)
       .forEach(entry => {
-        const task = entry;
+        // Find the original recurring task to get its category
+        const task = entries.find(e => e.id === entry.id);
         if (task) {
-          const category = task.title.split(':')[0].trim(); // Get category from task name
+          const category = task.title.split(':')[0].trim();
           categoryCounts[category] = (categoryCounts[category] || 0) + 1;
         }
+      });
+    
+    // Count regular tasks by category
+    filteredTasks
+      .filter(task => task.completed)
+      .forEach(task => {
+        categoryCounts[task.category] = (categoryCounts[task.category] || 0) + 1;
       });
     
     const byCategory = Object.entries(categoryCounts)
@@ -92,7 +125,7 @@ export function WeeklyProgressCard({ entries, categories, categoryColors = {} }:
       categoryData: byCategory,
       mostProductiveDay: mostProductive
     };
-  }, [entries, weekStart, weekEnd, weekDates]);
+  }, [entries, tasks, weekStart, weekEnd, weekDates]);
   
   // Color palette for the pie chart - use custom colors if available
   const getColor = (category: string, index: number) => {

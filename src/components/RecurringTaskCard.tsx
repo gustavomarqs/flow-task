@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RecurringTask, RecurringTaskEntry } from '@/types/recurring-task';
@@ -10,7 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 
 export interface RecurringTaskCardProps {
   task: RecurringTask;
-  todaysEntry: RecurringTaskEntry;
+  todaysEntry: RecurringTaskEntry | null;
   categoryColor?: string; // Make categoryColor optional
   onComplete: (entry: RecurringTaskEntry) => void;
   onEdit: (task: RecurringTask) => void;
@@ -32,6 +32,18 @@ export function RecurringTaskCard({
   const handleComplete = () => {
     if (todaysEntry) {
       onComplete(todaysEntry);
+    } else {
+      // Create a new entry for today
+      const today = new Date().toISOString().split('T')[0];
+      const newEntry: RecurringTaskEntry = {
+        id: `entry-${Date.now()}`,
+        recurringTaskId: task.id,
+        title: task.title,
+        date: today,
+        completed: true,
+        createdAt: new Date().toISOString()
+      };
+      onComplete(newEntry);
     }
   };
 
@@ -104,7 +116,7 @@ export function RecurringTaskCard({
         </Button>
 
         <Button 
-          onClick={() => handleComplete()} 
+          onClick={handleComplete} 
           size="sm"
           variant={todaysEntry?.completed ? "outline" : "default"}
           className={todaysEntry?.completed 

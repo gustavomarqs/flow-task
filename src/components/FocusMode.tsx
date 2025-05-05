@@ -3,10 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Slider } from "@/components/ui/slider";
 import { Task } from '@/types/task';
 import { RecurringTask, RecurringTaskEntry } from '@/types/recurring-task';
 import { CategoryBadge } from './CategoryBadge';
-import { Clock, Check, X } from 'lucide-react';
+import { Clock, Check, X, Play, Pause, Timer } from 'lucide-react';
 
 export interface FocusModeProps {
   selectedTask: { 
@@ -31,41 +32,44 @@ export function FocusMode({
   const [progress, setProgress] = useState(0);
   const [timerActive, setTimerActive] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(0);
+  const [selectedDuration, setSelectedDuration] = useState(25); // Default to 25 minutes
 
   useEffect(() => {
-    const defaultTime = 600; // Default to 10 minutes
     if (selectedTask?.task) {
-      // Safely check if timeEstimate exists
-      const estimatedTime = 'timeEstimate' in selectedTask.task ? selectedTask.task.timeEstimate : undefined;
-      setTimeRemaining(estimatedTime ? estimatedTime * 60 : defaultTime);
+      // Safely check if timeEstimate exists and use it as default if available
+      const timeEstimate = 'timeEstimate' in selectedTask.task ? selectedTask.task.timeEstimate : undefined;
+      setSelectedDuration(timeEstimate ? Math.min(Math.max(timeEstimate, 5), 60) : 25);
+      resetTimer(timeEstimate ? timeEstimate : 25);
     } else {
-      setTimeRemaining(defaultTime);
+      setSelectedDuration(25);
+      resetTimer(25);
     }
     setProgress(0);
+    setTimerActive(false);
   }, [selectedTask]);
+
+  const resetTimer = (minutes: number) => {
+    setTimeRemaining(minutes * 60);
+    setProgress(0);
+  };
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
-    const defaultTime = 600; // Default to 10 minutes
     
     if (timerActive && timeRemaining > 0) {
       intervalId = setInterval(() => {
         setTimeRemaining(prevTime => prevTime - 1);
-        
-        // Safely calculate progress
-        const totalTime = selectedTask?.task && 'timeEstimate' in selectedTask.task ? 
-          selectedTask.task.timeEstimate ? selectedTask.task.timeEstimate * 60 : defaultTime : 
-          defaultTime;
-          
-        setProgress(Math.min((1 - (timeRemaining - 1) / totalTime) * 100, 100));
+        const totalSeconds = selectedDuration * 60;
+        const remainingPercentage = ((totalSeconds - timeRemaining + 1) / totalSeconds) * 100;
+        setProgress(Math.min(remainingPercentage, 100));
       }, 1000);
     } else if (timeRemaining === 0 && timerActive) {
       setTimerActive(false);
-      // Optionally trigger some completion logic here
+      // Optionally play a sound or show a notification
     }
 
     return () => clearInterval(intervalId);
-  }, [timerActive, timeRemaining, selectedTask]);
+  }, [timerActive, timeRemaining, selectedDuration]);
 
   const toggleTimer = () => {
     setTimerActive(prev => !prev);
@@ -77,33 +81,39 @@ export function FocusMode({
     return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
   };
 
+  const handleDurationChange = (value: number[]) => {
+    const newDuration = value[0];
+    setSelectedDuration(newDuration);
+    resetTimer(newDuration);
+  };
+
   const handleComplete = () => {
-    if (selectedTask) {
-      if (selectedTask.type === 'regular') {
-        onCompleteTask(selectedTask.task.id);
-      } else if (selectedTask.type === 'recurring') {
-        // Create a new RecurringTaskEntry with the required properties
-        const today = new Date().toISOString().split('T')[0];
-        const recurringTask = selectedTask.task as RecurringTask;
-        const newEntry: RecurringTaskEntry = {
-          id: `entry-${Date.now()}`,  // Generate a unique ID
-          recurringTaskId: recurringTask.id,
-          title: recurringTask.title,
-          date: today,
-          completed: true,
-          createdAt: new Date().toISOString()
-        };
-        onCompleteRecurringTask(newEntry);
-      }
-      onClose();
+    if (!selectedTask) return;
+    
+    if (selectedTask.type === 'regular') {
+      onCompleteTask(selectedTask.task.id);
+    } else if (selectedTask.type === 'recurring') {
+      // Create a new RecurringTaskEntry with the required properties
+      const today = new Date().toISOString().split('T')[0];
+      const recurringTask = selectedTask.task as RecurringTask;
+      const newEntry: RecurringTaskEntry = {
+        id: `entry-${Date.now()}`,
+        recurringTaskId: recurringTask.id,
+        title: recurringTask.title,
+        date: today,
+        completed: true,
+        createdAt: new Date().toISOString()
+      };
+      onCompleteRecurringTask(newEntry);
     }
+    onClose();
   };
   
   return (
     <Dialog open={isOpen} onOpenChange={() => {
       if (isOpen) onClose();
     }}>
-      <DialogContent className="bg-zinc-900/90 text-white rounded-2xl shadow-md border-zinc-800 border">
+      <DialogContent className="bg-zinc-900/90 text-white rounded-2xl shadow-md border-zinc-800 border max-w-md">
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold flex justify-between items-center">
             {selectedTask?.task.title}
@@ -114,30 +124,64 @@ export function FocusMode({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="p-4">
+        <div className="p-5 space-y-6">
           {selectedTask && (
             <div className="mb-4">
               <CategoryBadge category={selectedTask.task.category} color={categoryColors[selectedTask.task.category]} />
+              {selectedTask.task.description && (
+                <p className="text-sm text-gray-400 mt-3">{selectedTask.task.description}</p>
+              )}
             </div>
           )}
-          <p className="text-sm text-gray-400 mb-4">{selectedTask?.task.description}</p>
 
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-gray-500" />
-              <span>Tempo restante: {formatTime(timeRemaining)}</span>
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-400">Duração (minutos)</span>
+                <span className="text-sm font-medium">{selectedDuration}</span>
+              </div>
+              <Slider 
+                value={[selectedDuration]} 
+                min={5} 
+                max={60} 
+                step={5} 
+                onValueChange={handleDurationChange}
+                disabled={timerActive}
+                className="py-4"
+              />
             </div>
-            <Button variant="outline" size="sm" onClick={toggleTimer}>
-              {timerActive ? 'Pausar' : 'Iniciar'}
-            </Button>
+
+            <div className="flex flex-col items-center">
+              <div className="text-3xl font-mono font-bold text-center mb-3">
+                {formatTime(timeRemaining)}
+              </div>
+              <Progress value={progress} className="w-full h-2 mb-4" />
+            </div>
+
+            <div className="flex items-center justify-between gap-3">
+              <Button 
+                variant="outline" 
+                size="lg"
+                className="flex-1 border-cyan-800/40 hover:bg-cyan-900/30 text-white"
+                onClick={toggleTimer}
+              >
+                {timerActive ? (
+                  <><Pause className="w-4 h-4 mr-2" /> Pausar</>
+                ) : (
+                  <><Play className="w-4 h-4 mr-2" /> Iniciar</>
+                )}
+              </Button>
+
+              <Button 
+                className="flex-1 bg-cyan-700 hover:bg-cyan-600 text-white" 
+                size="lg"
+                onClick={handleComplete}
+              >
+                <Check className="w-4 h-4 mr-2" />
+                Concluir
+              </Button>
+            </div>
           </div>
-
-          <Progress value={progress} className="mb-4" />
-
-          <Button className="w-full bg-cyan-700 hover:bg-cyan-600 text-white" onClick={handleComplete}>
-            <Check className="w-4 h-4 mr-2" />
-            Concluir tarefa
-          </Button>
         </div>
       </DialogContent>
     </Dialog>

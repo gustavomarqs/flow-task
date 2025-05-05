@@ -10,6 +10,7 @@ import { TasksContent } from '@/components/TasksContent';
 import { Task } from '@/types/task';
 import { RecurringTask, RecurringTaskEntry } from '@/types/recurring-task';
 import { getFromStorage, saveToStorage, getCategoryColors } from '@/utils/storage';
+import { useToast } from "@/components/ui/use-toast";
 
 export default function TasksPage() {
   // Regular tasks state
@@ -36,6 +37,9 @@ export default function TasksPage() {
   // Filter state
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("all");
+  
+  // Toast
+  const { toast } = useToast();
 
   // Load data from localStorage
   useEffect(() => {
@@ -66,6 +70,9 @@ export default function TasksPage() {
     if (savedEntries.length > 0) {
       setTaskEntries(savedEntries);
     }
+    
+    // Reset task entries for a new day
+    resetRecurringTasksForNewDay();
   }, []);
 
   // Save to localStorage whenever data changes
@@ -86,6 +93,39 @@ export default function TasksPage() {
     const colors = getCategoryColors(categories);
     setCategoryColors(colors);
   }, [categories]);
+  
+  // Reset recurring tasks for new day
+  const resetRecurringTasksForNewDay = () => {
+    const today = new Date().toISOString().split('T')[0];
+    const lastUsedDate = getFromStorage('lastUsedDate', '');
+    
+    // If it's a new day
+    if (lastUsedDate !== today) {
+      // Update last used date
+      saveToStorage('lastUsedDate', today);
+      
+      // Update recurring tasks with last completed date
+      const updatedRecurringTasks = recurringTasks.map(task => {
+        const entries = taskEntries.filter(entry => entry.recurringTaskId === task.id);
+        if (entries.length > 0) {
+          // Find most recent completed entry
+          const lastCompleted = entries
+            .filter(entry => entry.completed)
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+            
+          if (lastCompleted) {
+            return {
+              ...task,
+              lastCompletedDate: lastCompleted.date
+            };
+          }
+        }
+        return task;
+      });
+      
+      setRecurringTasks(updatedRecurringTasks);
+    }
+  };
 
   // Task handlers
   const handleAddTask = () => {
@@ -109,8 +149,16 @@ export default function TasksPage() {
   const handleSaveTask = (task: Task) => {
     if (editingTask) {
       setTasks(tasks.map(t => t.id === task.id ? task : t));
+      toast({
+        title: "Tarefa atualizada",
+        description: "Tarefa editada com sucesso!",
+      });
     } else {
       setTasks([...tasks, task]);
+      toast({
+        title: "Tarefa adicionada",
+        description: "Nova tarefa adicionada com sucesso!",
+      });
     }
     setIsFormOpen(false);
     setEditingTask(null);
@@ -119,43 +167,116 @@ export default function TasksPage() {
   const handleSaveRecurringTask = (task: RecurringTask) => {
     if (editingRecurringTask) {
       setRecurringTasks(recurringTasks.map(t => t.id === task.id ? task : t));
+      toast({
+        title: "Tarefa recorrente atualizada",
+        description: "Tarefa recorrente editada com sucesso!",
+      });
     } else {
       setRecurringTasks([...recurringTasks, task]);
+      toast({
+        title: "Tarefa recorrente adicionada",
+        description: "Nova tarefa recorrente adicionada com sucesso!",
+      });
     }
     setIsFormOpen(false);
     setEditingRecurringTask(null);
   };
 
   const handleCompleteTask = (id: string) => {
-    setTasks(tasks.map(task => 
-      task.id === id ? { ...task, completed: !task.completed } : task
-    ));
+    setTasks(prevTasks => {
+      const updatedTasks = prevTasks.map(task => 
+        task.id === id ? { ...task, completed: !task.completed } : task
+      );
+      
+      // Find the task that was just updated
+      const updatedTask = updatedTasks.find(task => task.id === id);
+      
+      // Show toast notification
+      if (updatedTask) {
+        toast({
+          title: updatedTask.completed ? "Tarefa concluída" : "Tarefa reaberta",
+          description: updatedTask.title,
+        });
+      }
+      
+      return updatedTasks;
+    });
   };
 
   const handleDeleteTask = (id: string) => {
     setTasks(tasks.filter(task => task.id !== id));
+    toast({
+      title: "Tarefa removida",
+      description: "A tarefa foi removida com sucesso.",
+      variant: "destructive"
+    });
   };
 
   const handleDeleteRecurringTask = (id: string) => {
     setRecurringTasks(recurringTasks.filter(task => task.id !== id));
     // Also delete all entries for this task
     setTaskEntries(taskEntries.filter(entry => entry.recurringTaskId !== id));
+    toast({
+      title: "Tarefa recorrente removida",
+      description: "A tarefa recorrente foi removida com sucesso.",
+      variant: "destructive"
+    });
   };
 
   const handleCompleteRecurringTask = (entry: RecurringTaskEntry) => {
     // Check if there's already an entry for today's task
-    const existingEntryIndex = taskEntries.findIndex(e => e.id === entry.id);
+    const existingEntryIndex = taskEntries.findIndex(e => 
+      e.recurringTaskId === entry.recurringTaskId && e.date === entry.date
+    );
     
     if (existingEntryIndex >= 0) {
       // Update existing entry
-      setTaskEntries([
-        ...taskEntries.slice(0, existingEntryIndex),
-        entry,
-        ...taskEntries.slice(existingEntryIndex + 1)
-      ]);
+      const newEntries = [...taskEntries];
+      // Toggle completion status
+      const isCompleted = !newEntries[existingEntryIndex].completed;
+      newEntries[existingEntryIndex] = {
+        ...newEntries[existingEntryIndex],
+        completed: isCompleted
+      };
+      setTaskEntries(newEntries);
+      
+      // Update lastCompletedDate in the recurring task if completed
+      if (isCompleted) {
+        setRecurringTasks(prevTasks => 
+          prevTasks.map(task => 
+            task.id === entry.recurringTaskId ? 
+              { ...task, lastCompletedDate: entry.date } : 
+              task
+          )
+        );
+        
+        toast({
+          title: "Tarefa concluída",
+          description: entry.title
+        });
+      } else {
+        toast({
+          title: "Tarefa reaberta",
+          description: entry.title
+        });
+      }
     } else {
       // Add new entry
       setTaskEntries([...taskEntries, entry]);
+      
+      // Update lastCompletedDate in the recurring task
+      setRecurringTasks(prevTasks => 
+        prevTasks.map(task => 
+          task.id === entry.recurringTaskId ? 
+            { ...task, lastCompletedDate: entry.date } : 
+            task
+        )
+      );
+      
+      toast({
+        title: "Tarefa concluída",
+        description: entry.title
+      });
     }
   };
 
@@ -176,7 +297,6 @@ export default function TasksPage() {
 
   // Start focus mode
   const handleStartFocus = (taskType: 'regular' | 'recurring', task: Task | RecurringTask) => {
-    console.log("Starting focus mode with task:", task);
     setFocusTask({ type: taskType, task });
     setIsFocusModeOpen(true);
   };
@@ -228,6 +348,12 @@ export default function TasksPage() {
   const getEntriesForTask = (taskId: string) => {
     return taskEntries.filter(entry => entry.recurringTaskId === taskId);
   };
+  
+  // Get today's entries for recurring tasks
+  const getTodaysEntries = () => {
+    const today = new Date().toISOString().split('T')[0];
+    return taskEntries.filter(entry => entry.date === today);
+  };
 
   return (
     <div className="animate-fade-in space-y-8">
@@ -239,7 +365,8 @@ export default function TasksPage() {
       />
       
       <WeeklyProgressCard 
-        entries={taskEntries} 
+        entries={taskEntries}
+        tasks={tasks}
         categories={categories}
         categoryColors={categoryColors}
       />
@@ -255,7 +382,7 @@ export default function TasksPage() {
         categories={categories}
         filteredTasks={filteredTasks}
         filteredRecurringTasks={filteredRecurringTasks}
-        taskEntries={taskEntries}
+        taskEntries={getTodaysEntries()}
         categoryColors={categoryColors}
         onCategoryClick={handleCategoryClick}
         onCompleteTask={handleCompleteTask}
