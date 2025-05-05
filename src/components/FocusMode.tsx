@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -32,21 +33,31 @@ export function FocusMode({
   const [timeRemaining, setTimeRemaining] = useState(0);
 
   useEffect(() => {
-    if (selectedTask?.task.timeEstimate) {
-      setTimeRemaining(selectedTask.task.timeEstimate * 60);
+    const defaultTime = 600; // Default to 10 minutes
+    if (selectedTask?.task) {
+      // Safely check if timeEstimate exists
+      const estimatedTime = 'timeEstimate' in selectedTask.task ? selectedTask.task.timeEstimate : undefined;
+      setTimeRemaining(estimatedTime ? estimatedTime * 60 : defaultTime);
     } else {
-      setTimeRemaining(600); // Default to 10 minutes if no time estimate
+      setTimeRemaining(defaultTime);
     }
     setProgress(0);
   }, [selectedTask]);
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
-
+    const defaultTime = 600; // Default to 10 minutes
+    
     if (timerActive && timeRemaining > 0) {
       intervalId = setInterval(() => {
         setTimeRemaining(prevTime => prevTime - 1);
-        setProgress(Math.min((1 - (timeRemaining - 1) / (selectedTask?.task.timeEstimate ? selectedTask.task.timeEstimate * 60 : 600)) * 100, 100));
+        
+        // Safely calculate progress
+        const totalTime = selectedTask?.task && 'timeEstimate' in selectedTask.task ? 
+          selectedTask.task.timeEstimate ? selectedTask.task.timeEstimate * 60 : defaultTime : 
+          defaultTime;
+          
+        setProgress(Math.min((1 - (timeRemaining - 1) / totalTime) * 100, 100));
       }, 1000);
     } else if (timeRemaining === 0 && timerActive) {
       setTimerActive(false);
@@ -71,10 +82,18 @@ export function FocusMode({
       if (selectedTask.type === 'regular') {
         onCompleteTask(selectedTask.task.id);
       } else if (selectedTask.type === 'recurring') {
-        // Assuming you have a way to identify the current entry
-        // You might need to fetch the current entry or pass it down as a prop
-        // For now, let's assume the entry is the task itself
-        onCompleteRecurringTask(selectedTask.task as RecurringTask);
+        // Create a new RecurringTaskEntry with the required properties
+        const today = new Date().toISOString().split('T')[0];
+        const recurringTask = selectedTask.task as RecurringTask;
+        const newEntry: RecurringTaskEntry = {
+          id: `entry-${Date.now()}`,  // Generate a unique ID
+          recurringTaskId: recurringTask.id,
+          title: recurringTask.title,
+          date: today,
+          completed: true,
+          createdAt: new Date().toISOString()
+        };
+        onCompleteRecurringTask(newEntry);
       }
       onClose();
     }

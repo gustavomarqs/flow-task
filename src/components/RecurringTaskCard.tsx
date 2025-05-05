@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RecurringTask, RecurringTaskEntry } from '@/types/recurring-task';
 import { CategoryBadge } from './CategoryBadge';
-import { formatDateTime } from '@/utils/format';
+import { formatDateBR, formatDateTime } from '@/utils/format';
 import { Clock, CheckCircle, Calendar, MoreVertical, Edit, Trash, History, PlayCircle } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
@@ -73,10 +74,12 @@ export function RecurringTaskCard({
           <p className={`text-sm text-gray-400 mb-3 ${todaysEntry?.completed ? 'line-through' : ''}`}>{task.description}</p>
         )}
         <div className="flex items-center gap-x-4 text-sm text-gray-400 mb-1">
-          <div className="flex items-center">
-            <Calendar className="w-3.5 h-3.5 mr-1.5 text-gray-500" />
-            <span>{task.frequency}</span>
-          </div>
+          {task.frequency && (
+            <div className="flex items-center">
+              <Calendar className="w-3.5 h-3.5 mr-1.5 text-gray-500" />
+              <span>{task.frequency}</span>
+            </div>
+          )}
           {task.timeEstimate && (
             <div className="flex items-center">
               <Clock className="w-3.5 h-3.5 mr-1.5 text-gray-500" />

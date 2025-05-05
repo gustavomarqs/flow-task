@@ -8,4 +8,5 @@ export interface Task {
   time?: string;
   completed: boolean;
   createdAt: string;
+  timeEstimate?: number; // Adding this property to fix the error
 }
