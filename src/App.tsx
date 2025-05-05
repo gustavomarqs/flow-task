@@ -8,23 +8,34 @@ import AchievementsPage from "./pages/AchievementsPage";
 import ThoughtsPage from "./pages/ThoughtsPage";
 import ConfiguracoesPage from "./pages/ConfiguracoesPage";
 import NotFound from "./pages/NotFound";
+import LoginPage from "./pages/LoginPage";
+import { AuthProvider } from "./auth/AuthProvider";
+import { ProtectedRoute } from "./auth/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <BrowserRouter>
-    <QueryClientProvider client={queryClient}>
-      <Routes>
-        <Route element={<MainLayout />}>
-          <Route path="/" element={<TasksPage />} />
-          <Route path="/facanhas" element={<AchievementsPage />} />
-          <Route path="/pensamentos" element={<ThoughtsPage />} />
-          <Route path="/configuracoes" element={<ConfiguracoesPage />} />
-          <Route path="*" element={<NotFound />} />
-        </Route>
-      </Routes>
-      <Toaster />
-    </QueryClientProvider>
+    <AuthProvider>
+      <QueryClientProvider client={queryClient}>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          
+          <Route element={
+            <ProtectedRoute>
+              <MainLayout />
+            </ProtectedRoute>
+          }>
+            <Route path="/" element={<TasksPage />} />
+            <Route path="/facanhas" element={<AchievementsPage />} />
+            <Route path="/pensamentos" element={<ThoughtsPage />} />
+            <Route path="/configuracoes" element={<ConfiguracoesPage />} />
+            <Route path="*" element={<NotFound />} />
+          </Route>
+        </Routes>
+        <Toaster />
+      </QueryClientProvider>
+    </AuthProvider>
   </BrowserRouter>
 );
 
