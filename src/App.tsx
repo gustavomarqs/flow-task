@@ -12,8 +12,8 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <BrowserRouter>
+  <BrowserRouter>
+    <QueryClientProvider client={queryClient}>
       <Routes>
         <Route element={<MainLayout />}>
           <Route path="/" element={<TasksPage />} />
@@ -23,9 +23,9 @@ const App = () => (
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
-    </BrowserRouter>
-    <Toaster />
-  </QueryClientProvider>
+      <Toaster />
+    </QueryClientProvider>
+  </BrowserRouter>
 );
 
 export default App;
