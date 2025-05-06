@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RecurringTaskEntry } from '@/types/recurring-task';
@@ -12,6 +11,7 @@ import {
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { startOfWeek, endOfWeek, format, eachDayOfInterval, isToday, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface WeeklyProgressCardProps {
   entries: RecurringTaskEntry[];
@@ -148,8 +148,8 @@ export function WeeklyProgressCard({ entries, tasks, categories, categoryColors 
           <div className="relative">
             <Progress 
               value={completionRate} 
-              className="h-3 rounded-full bg-zinc-800"
-              indicatorClassName="bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full"
+              className="h-4 rounded-full bg-zinc-800"
+              indicatorClassName="bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full transition-all duration-700 ease-in-out"
             />
             <span className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xs font-bold text-white shadow-sm">
               {completionRate}%
@@ -169,32 +169,34 @@ export function WeeklyProgressCard({ entries, tasks, categories, categoryColors 
           </div>
         </div>
         
-        {/* Day overview */}
+        {/* Day overview - with horizontal scroll for mobile */}
         <div className="space-y-3">
           <h4 className="text-sm font-medium text-gray-300">Visão por dia</h4>
-          <div className="grid grid-cols-7 gap-2">
-            {tasksByDay.map((dayData, idx) => (
-              <div 
-                key={idx} 
-                className={`flex flex-col items-center p-3 rounded-lg shadow-sm transition-transform duration-200 hover:scale-105 ${
-                  isToday(dayData.date) ? 'bg-cyan-900/30 ring-2 ring-cyan-500' : 'bg-zinc-800/50'
-                }`}
-              >
-                <span className="text-xs font-medium text-gray-300">{format(dayData.date, 'EEE', { locale: ptBR })}</span>
-                <div className="flex flex-col items-center mt-2">
-                  <span className="text-lg font-bold text-white">{dayData.completed}</span>
-                  <span className="text-xs text-gray-400 rounded-full bg-zinc-700/70 px-2 py-0.5 mt-1">{dayData.total}</span>
+          <ScrollArea className="w-full">
+            <div className="grid grid-cols-7 gap-2 min-w-[500px]">
+              {tasksByDay.map((dayData, idx) => (
+                <div 
+                  key={idx} 
+                  className={`flex flex-col items-center p-3 rounded-lg shadow-sm transition-transform duration-200 hover:scale-105 ${
+                    isToday(dayData.date) ? 'bg-cyan-900/30 ring-2 ring-cyan-500' : 'bg-zinc-800/50'
+                  }`}
+                >
+                  <span className="text-xs font-medium text-gray-300">{format(dayData.date, 'EEE', { locale: ptBR })}</span>
+                  <div className="flex flex-col items-center mt-2">
+                    <span className="text-lg font-bold text-white">{dayData.completed}</span>
+                    <span className="text-xs text-gray-400 rounded-full bg-zinc-700/70 px-2 py-0.5 mt-1">{dayData.total}</span>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </ScrollArea>
         </div>
         
         {/* Category breakdown */}
         {categoryData.length > 0 && (
           <div className="space-y-4">
             <h4 className="text-sm font-medium text-gray-300">Categorias mais ativas</h4>
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Pie chart */}
               <div className="h-32">
                 <ChartContainer
@@ -216,6 +218,8 @@ export function WeeklyProgressCard({ entries, tasks, categories, categoryColors 
                         dataKey="value"
                         nameKey="name"
                         label={false}
+                        animationBegin={0}
+                        animationDuration={800}
                       >
                         {categoryData.map((entry, index) => (
                           <Cell 

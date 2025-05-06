@@ -9,6 +9,7 @@ import ThoughtsPage from "./pages/ThoughtsPage";
 import ConfiguracoesPage from "./pages/ConfiguracoesPage";
 import NotFound from "./pages/NotFound";
 import LoginPage from "./pages/LoginPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import { AuthProvider } from "./auth/AuthProvider";
 import { ProtectedRoute } from "./auth/ProtectedRoute";
 
@@ -20,6 +21,7 @@ const App = () => (
       <QueryClientProvider client={queryClient}>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           
           <Route element={
             <ProtectedRoute>
