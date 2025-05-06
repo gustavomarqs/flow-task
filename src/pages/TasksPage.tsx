@@ -1,16 +1,15 @@
-
 import React, { useState, useEffect } from 'react';
 import { PageHeader } from '@/components/PageHeader';
 import { TaskForm } from '@/components/TaskForm';
 import { TaskHistoryModal } from '@/components/TaskHistoryModal';
-import { WeeklyProgressCard } from '@/components/WeeklyProgressCard';
+import { CollapsibleWeeklyProgressCard } from '@/components/CollapsibleWeeklyProgressCard';
 import { FocusMode } from '@/components/FocusMode';
 import { SearchBar } from '@/components/SearchBar';
 import { TasksContent } from '@/components/TasksContent';
 import { Task } from '@/types/task';
 import { RecurringTask, RecurringTaskEntry } from '@/types/recurring-task';
 import { getFromStorage, saveToStorage, getCategoryColors } from '@/utils/storage';
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { getCurrentDateTime, getCurrentDate } from '@/utils/date-time';
 import { useAuth } from '@/auth/AuthProvider';
 
@@ -401,7 +400,7 @@ export default function TasksPage() {
         buttonClassName="bg-cyan-600 hover:bg-cyan-700 text-white px-6 py-2 rounded-full shadow-md transition-all duration-200 hover:scale-105"
       />
       
-      <WeeklyProgressCard 
+      <CollapsibleWeeklyProgressCard 
         entries={taskEntries}
         tasks={tasks}
         categories={categories}
