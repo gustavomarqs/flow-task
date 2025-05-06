@@ -8,6 +8,7 @@
  * This ensures we always have consistent date/time recording
  */
 export function getCurrentDateTime(): string {
+  // Use the browser's timezone to get the correct local date and time
   const now = new Date();
   return now.toISOString();
 }
@@ -33,7 +34,8 @@ export function formatDisplayDate(dateString: string): string {
     return date.toLocaleDateString('pt-BR', {
       day: '2-digit',
       month: '2-digit',
-      year: 'numeric'
+      year: 'numeric',
+      timeZone: 'America/Sao_Paulo' // Set to Brazil timezone for consistency
     });
   } catch (error) {
     console.error('Error formatting date:', error);
@@ -52,7 +54,8 @@ export function formatDisplayDateTime(dateString: string): string {
       month: '2-digit',
       year: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
+      timeZone: 'America/Sao_Paulo' // Set to Brazil timezone for consistency
     });
   } catch (error) {
     console.error('Error formatting date and time:', error);
@@ -89,4 +92,13 @@ export function getTimeFromDateTime(dateTimeString: string): string {
     console.error('Error getting time from date string:', error);
     return '';
   }
+}
+
+/**
+ * Get local date object from ISO string
+ * This helps with timezone issues when working with dates
+ */
+export function getLocalDateFromISO(dateString: string): Date {
+  const date = new Date(dateString);
+  return new Date(date.getTime() + date.getTimezoneOffset() * 60 * 1000);
 }

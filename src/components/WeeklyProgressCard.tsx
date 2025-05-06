@@ -85,31 +85,31 @@ export function WeeklyProgressCard({ entries, tasks, categories, categoryColors 
       };
     });
     
-    // Calculate category distribution
-    const categoryCounts: Record<string, number> = {};
+    // Get categories from completed tasks and entries
+    const categoryTaskCount: Record<string, number> = {};
     
-    // Count recurring task entries by category
+    // Count completed recurring task entries by category
     filteredEntries
       .filter(entry => entry.completed)
       .forEach(entry => {
-        // Find the original recurring task to get its category
-        const task = entries.find(e => e.id === entry.id);
-        if (task) {
-          const category = task.title.split(':')[0].trim();
-          categoryCounts[category] = (categoryCounts[category] || 0) + 1;
-        }
+        // Find the recurring task to get its category
+        const recurringTaskId = entry.recurringTaskId;
+        const taskCategory = entry.category || "Sem categoria";
+        
+        categoryTaskCount[taskCategory] = (categoryTaskCount[taskCategory] || 0) + 1;
       });
     
     // Count regular tasks by category
     filteredTasks
       .filter(task => task.completed)
       .forEach(task => {
-        categoryCounts[task.category] = (categoryCounts[task.category] || 0) + 1;
+        const taskCategory = task.category || "Sem categoria";
+        categoryTaskCount[taskCategory] = (categoryTaskCount[taskCategory] || 0) + 1;
       });
     
-    const byCategory = Object.entries(categoryCounts)
+    // Convert to array format for the pie chart
+    const byCategory = Object.entries(categoryTaskCount)
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 4) // Top 4 categories
       .map(([name, value]) => ({ name, value }));
     
     // Find most productive day
@@ -128,9 +128,11 @@ export function WeeklyProgressCard({ entries, tasks, categories, categoryColors 
     };
   }, [entries, tasks, weekStart, weekEnd, weekDates]);
   
-  // Color palette for the pie chart - use custom colors if available
+  // Default color palette for categories without assigned colors
+  const defaultColors = ['#06b6d4', '#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444'];
+  
+  // Get color for a category, using custom colors if available
   const getColor = (category: string, index: number) => {
-    const defaultColors = ['#06b6d4', '#3b82f6', '#8b5cf6', '#10b981'];
     return categoryColors[category] || defaultColors[index % defaultColors.length];
   };
 
@@ -189,13 +191,13 @@ export function WeeklyProgressCard({ entries, tasks, categories, categoryColors 
         </ScrollArea>
       </div>
       
-      {/* Category breakdown */}
+      {/* Category breakdown - IMPROVED */}
       {categoryData.length > 0 && (
         <div className="space-y-4">
           <h4 className="text-sm font-medium text-gray-300">Categorias mais ativas</h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             {/* Pie chart */}
-            <div className="h-36 sm:h-32">
+            <div className="h-48 sm:h-40">
               <ChartContainer
                 className="h-full"
                 config={categoryData.reduce((acc, cat, idx) => {
@@ -209,19 +211,41 @@ export function WeeklyProgressCard({ entries, tasks, categories, categoryColors 
                       data={categoryData}
                       cx="50%"
                       cy="50%"
-                      innerRadius={30}
-                      outerRadius={50}
-                      paddingAngle={5}
+                      innerRadius={35}
+                      outerRadius={60}
+                      paddingAngle={4}
                       dataKey="value"
                       nameKey="name"
-                      label={false}
                       animationBegin={0}
                       animationDuration={800}
+                      label={(props) => {
+                        const { cx, cy, midAngle, innerRadius, outerRadius, name, value } = props;
+                        const RADIAN = Math.PI / 180;
+                        const radius = 25 + innerRadius + (outerRadius - innerRadius);
+                        const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                        const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+                        // Only show label for larger segments to prevent overlap
+                        return value > totalTasks * 0.1 ? (
+                          <text 
+                            x={x} 
+                            y={y} 
+                            fill={getColor(name as string, props.index)}
+                            textAnchor={x > cx ? 'start' : 'end'} 
+                            dominantBaseline="central"
+                            className="text-[10px] font-medium"
+                          >
+                            {name}
+                          </text>
+                        ) : null;
+                      }}
                     >
                       {categoryData.map((entry, index) => (
                         <Cell 
                           key={`cell-${index}`} 
                           fill={getColor(entry.name, index)} 
+                          stroke="rgba(20, 20, 20, 0.2)"
+                          strokeWidth={1}
                         />
                       ))}
                     </Pie>
@@ -232,17 +256,20 @@ export function WeeklyProgressCard({ entries, tasks, categories, categoryColors 
             </div>
             
             {/* Category list */}
-            <div className="space-y-2">
+            <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
               {categoryData.map((cat, idx) => (
-                <div key={cat.name} className="flex justify-between items-center bg-zinc-800/70 rounded-md p-2 shadow-sm">
+                <div key={cat.name} className="flex justify-between items-center bg-zinc-800/70 rounded-md p-2 shadow-sm hover:bg-zinc-700/50 transition-colors">
                   <div className="flex items-center gap-2">
                     <div 
                       className="w-3 h-3 rounded-full" 
                       style={{ backgroundColor: getColor(cat.name, idx) }} 
                     />
-                    <span className="text-sm">{cat.name}</span>
+                    <span className="text-sm font-medium">{cat.name}</span>
                   </div>
-                  <span className="font-medium text-sm rounded-full bg-zinc-700 px-2.5 py-0.5">{cat.value}</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs text-gray-400">{Math.round((cat.value / completedTasks) * 100)}%</span>
+                    <span className="font-medium text-sm rounded-full bg-zinc-700 px-2.5 py-0.5">{cat.value}</span>
+                  </div>
                 </div>
               ))}
             </div>
