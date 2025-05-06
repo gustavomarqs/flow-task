@@ -1,3 +1,4 @@
+
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
 
@@ -16,7 +17,7 @@ function createWindow() {
 
   const indexPath = app.isPackaged
     ? `file://${path.join(__dirname, 'dist/index.html')}` // Caminho no ambiente empacotado
-    : 'http://localhost:5173'; // Caminho no ambiente de desenvolvimento
+    : 'http://localhost:8080'; // Atualizado para porta 8080
 
   win.loadURL(indexPath);
 }

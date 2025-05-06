@@ -1,3 +1,4 @@
+
 const { app, BrowserWindow, Menu } = require('electron');
 const path = require('path');
 const isDev = require('electron-is-dev');
@@ -18,11 +19,11 @@ function createWindow() {
 
   if (isDev) {
     // Ambiente de desenvolvimento
-    mainWindow.loadURL('http://localhost:5173');
+    mainWindow.loadURL('http://localhost:8080'); // Atualizado para porta 8080
     mainWindow.webContents.openDevTools(); // Para debug
   } else {
     // Ambiente de produção
-    mainWindow.loadFile(path.join(__dirname, '../index.html'));
+    mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
   }
 
   mainWindow.on('closed', () => {
