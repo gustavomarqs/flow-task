@@ -11,6 +11,8 @@ import { Task } from '@/types/task';
 import { RecurringTask, RecurringTaskEntry } from '@/types/recurring-task';
 import { getFromStorage, saveToStorage, getCategoryColors } from '@/utils/storage';
 import { useToast } from "@/components/ui/use-toast";
+import { getCurrentDateTime, getCurrentDate } from '@/utils/date-time';
+import { useAuth } from '@/auth/AuthProvider';
 
 export default function TasksPage() {
   // Regular tasks state
@@ -38,71 +40,90 @@ export default function TasksPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("all");
   
+  // Auth context
+  const { user } = useAuth();
+  
   // Toast
   const { toast } = useToast();
 
-  // Load data from localStorage
+  // Load data from localStorage, using current user ID if authenticated
   useEffect(() => {
-    // Load tasks
-    const savedTasks = getFromStorage('tasks', []);
-    if (savedTasks.length > 0) {
-      setTasks(savedTasks);
-    }
-    
-    // Load categories
-    const savedCategories = getFromStorage('categories', ["Treinos", "Estudos"]);
-    if (savedCategories.length > 0) {
-      setCategories(savedCategories);
+    // Only load data if we have a user (when authenticated)
+    if (user) {
+      // Load tasks
+      const savedTasks = getFromStorage(`tasks_${user.id}`, []);
+      if (savedTasks.length > 0) {
+        setTasks(savedTasks);
+      }
       
-      // Load category colors
-      const colors = getCategoryColors(savedCategories);
+      // Load categories
+      const savedCategories = getFromStorage(`categories_${user.id}`, ["Treinos", "Estudos"]);
+      if (savedCategories.length > 0) {
+        setCategories(savedCategories);
+        
+        // Load category colors
+        const colors = getCategoryColors(savedCategories);
+        setCategoryColors(colors);
+      }
+      
+      // Load recurring tasks
+      const savedRecurringTasks = getFromStorage(`recurringTasks_${user.id}`, []);
+      if (savedRecurringTasks.length > 0) {
+        setRecurringTasks(savedRecurringTasks);
+      }
+      
+      // Load task entries
+      const savedEntries = getFromStorage(`taskEntries_${user.id}`, []);
+      if (savedEntries.length > 0) {
+        setTaskEntries(savedEntries);
+      }
+      
+      // Reset task entries for a new day
+      resetRecurringTasksForNewDay();
+    }
+  }, [user?.id]);
+
+  // Save to localStorage, using current user ID if authenticated
+  useEffect(() => {
+    if (user) {
+      saveToStorage(`tasks_${user.id}`, tasks);
+    }
+  }, [tasks, user?.id]);
+
+  useEffect(() => {
+    if (user) {
+      saveToStorage(`recurringTasks_${user.id}`, recurringTasks);
+    }
+  }, [recurringTasks, user?.id]);
+
+  useEffect(() => {
+    if (user) {
+      saveToStorage(`taskEntries_${user.id}`, taskEntries);
+    }
+  }, [taskEntries, user?.id]);
+
+  useEffect(() => {
+    if (user) {
+      // Update category colors when categories change
+      const colors = getCategoryColors(categories);
       setCategoryColors(colors);
+      
+      // Save categories
+      saveToStorage(`categories_${user.id}`, categories);
     }
-    
-    // Load recurring tasks
-    const savedRecurringTasks = getFromStorage('recurringTasks', []);
-    if (savedRecurringTasks.length > 0) {
-      setRecurringTasks(savedRecurringTasks);
-    }
-    
-    // Load task entries
-    const savedEntries = getFromStorage('taskEntries', []);
-    if (savedEntries.length > 0) {
-      setTaskEntries(savedEntries);
-    }
-    
-    // Reset task entries for a new day
-    resetRecurringTasksForNewDay();
-  }, []);
-
-  // Save to localStorage whenever data changes
-  useEffect(() => {
-    saveToStorage('tasks', tasks);
-  }, [tasks]);
-
-  useEffect(() => {
-    saveToStorage('recurringTasks', recurringTasks);
-  }, [recurringTasks]);
-
-  useEffect(() => {
-    saveToStorage('taskEntries', taskEntries);
-  }, [taskEntries]);
-
-  useEffect(() => {
-    // Update category colors when categories change
-    const colors = getCategoryColors(categories);
-    setCategoryColors(colors);
-  }, [categories]);
+  }, [categories, user?.id]);
   
   // Reset recurring tasks for new day
   const resetRecurringTasksForNewDay = () => {
-    const today = new Date().toISOString().split('T')[0];
-    const lastUsedDate = getFromStorage('lastUsedDate', '');
+    if (!user) return;
+    
+    const today = getCurrentDate();
+    const lastUsedDate = getFromStorage(`lastUsedDate_${user.id}`, '');
     
     // If it's a new day
     if (lastUsedDate !== today) {
       // Update last used date
-      saveToStorage('lastUsedDate', today);
+      saveToStorage(`lastUsedDate_${user.id}`, today);
       
       // Update recurring tasks with last completed date
       const updatedRecurringTasks = recurringTasks.map(task => {
@@ -147,14 +168,19 @@ export default function TasksPage() {
   };
 
   const handleSaveTask = (task: Task) => {
+    const taskWithTimestamp = {
+      ...task,
+      createdAt: task.createdAt || getCurrentDateTime() // Ensure createdAt is set
+    };
+    
     if (editingTask) {
-      setTasks(tasks.map(t => t.id === task.id ? task : t));
+      setTasks(tasks.map(t => t.id === task.id ? taskWithTimestamp : t));
       toast({
         title: "Tarefa atualizada",
         description: "Tarefa editada com sucesso!",
       });
     } else {
-      setTasks([...tasks, task]);
+      setTasks([...tasks, taskWithTimestamp]);
       toast({
         title: "Tarefa adicionada",
         description: "Nova tarefa adicionada com sucesso!",
@@ -165,14 +191,19 @@ export default function TasksPage() {
   };
 
   const handleSaveRecurringTask = (task: RecurringTask) => {
+    const taskWithTimestamp = {
+      ...task,
+      createdAt: task.createdAt || getCurrentDateTime() // Ensure createdAt is set
+    };
+    
     if (editingRecurringTask) {
-      setRecurringTasks(recurringTasks.map(t => t.id === task.id ? task : t));
+      setRecurringTasks(recurringTasks.map(t => t.id === task.id ? taskWithTimestamp : t));
       toast({
         title: "Tarefa recorrente atualizada",
         description: "Tarefa recorrente editada com sucesso!",
       });
     } else {
-      setRecurringTasks([...recurringTasks, task]);
+      setRecurringTasks([...recurringTasks, taskWithTimestamp]);
       toast({
         title: "Tarefa recorrente adicionada",
         description: "Nova tarefa recorrente adicionada com sucesso!",
@@ -224,9 +255,15 @@ export default function TasksPage() {
   };
 
   const handleCompleteRecurringTask = (entry: RecurringTaskEntry) => {
+    // Make sure entry has createdAt timestamp
+    const entryWithTimestamp = {
+      ...entry,
+      createdAt: entry.createdAt || getCurrentDateTime()
+    };
+    
     // Check if there's already an entry for today's task
     const existingEntryIndex = taskEntries.findIndex(e => 
-      e.recurringTaskId === entry.recurringTaskId && e.date === entry.date
+      e.recurringTaskId === entryWithTimestamp.recurringTaskId && e.date === entryWithTimestamp.date
     );
     
     if (existingEntryIndex >= 0) {
@@ -244,38 +281,38 @@ export default function TasksPage() {
       if (isCompleted) {
         setRecurringTasks(prevTasks => 
           prevTasks.map(task => 
-            task.id === entry.recurringTaskId ? 
-              { ...task, lastCompletedDate: entry.date } : 
+            task.id === entryWithTimestamp.recurringTaskId ? 
+              { ...task, lastCompletedDate: entryWithTimestamp.date } : 
               task
           )
         );
         
         toast({
           title: "Tarefa concluída",
-          description: entry.title
+          description: entryWithTimestamp.title
         });
       } else {
         toast({
           title: "Tarefa reaberta",
-          description: entry.title
+          description: entryWithTimestamp.title
         });
       }
     } else {
       // Add new entry
-      setTaskEntries([...taskEntries, entry]);
+      setTaskEntries([...taskEntries, entryWithTimestamp]);
       
       // Update lastCompletedDate in the recurring task
       setRecurringTasks(prevTasks => 
         prevTasks.map(task => 
-          task.id === entry.recurringTaskId ? 
-            { ...task, lastCompletedDate: entry.date } : 
+          task.id === entryWithTimestamp.recurringTaskId ? 
+            { ...task, lastCompletedDate: entryWithTimestamp.date } : 
             task
         )
       );
       
       toast({
         title: "Tarefa concluída",
-        description: entry.title
+        description: entryWithTimestamp.title
       });
     }
   };

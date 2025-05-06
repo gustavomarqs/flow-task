@@ -13,7 +13,17 @@ import ResetPasswordPage from "./pages/ResetPasswordPage";
 import { AuthProvider } from "./auth/AuthProvider";
 import { ProtectedRoute } from "./auth/ProtectedRoute";
 
-const queryClient = new QueryClient();
+// Create a client with increased staleTime and retry logic for better data handling
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      retry: 3,
+      refetchOnWindowFocus: true,
+      refetchOnReconnect: true,
+    },
+  },
+});
 
 const App = () => (
   <HashRouter>

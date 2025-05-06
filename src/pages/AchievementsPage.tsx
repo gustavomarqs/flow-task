@@ -5,25 +5,32 @@ import { AchievementCard } from '@/components/AchievementCard';
 import { AchievementForm } from '@/components/AchievementForm';
 import { Input } from '@/components/ui/input';
 import { Achievement } from '@/types/achievement';
+import { getCurrentDateTime } from '@/utils/date-time';
+import { useAuth } from '@/auth/AuthProvider';
 
 export default function AchievementsPage() {
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingAchievement, setEditingAchievement] = useState<Achievement | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const { user } = useAuth();
 
   useEffect(() => {
-    // Load achievements from localStorage
-    const savedAchievements = localStorage.getItem('achievements');
-    if (savedAchievements) {
-      setAchievements(JSON.parse(savedAchievements));
+    // Load achievements from localStorage with user-specific key
+    if (user) {
+      const savedAchievements = localStorage.getItem(`achievements_${user.id}`);
+      if (savedAchievements) {
+        setAchievements(JSON.parse(savedAchievements));
+      }
     }
-  }, []);
+  }, [user?.id]);
 
   useEffect(() => {
-    // Save achievements to localStorage
-    localStorage.setItem('achievements', JSON.stringify(achievements));
-  }, [achievements]);
+    // Save achievements to localStorage with user-specific key
+    if (user) {
+      localStorage.setItem(`achievements_${user.id}`, JSON.stringify(achievements));
+    }
+  }, [achievements, user?.id]);
 
   const handleAddAchievement = () => {
     setEditingAchievement(null);
@@ -36,10 +43,16 @@ export default function AchievementsPage() {
   };
 
   const handleSaveAchievement = (achievement: Achievement) => {
+    // Ensure created timestamp is set
+    const achievementWithTimestamp = {
+      ...achievement,
+      createdAt: achievement.createdAt || getCurrentDateTime()
+    };
+    
     if (editingAchievement) {
-      setAchievements(achievements.map(a => a.id === achievement.id ? achievement : a));
+      setAchievements(achievements.map(a => a.id === achievement.id ? achievementWithTimestamp : a));
     } else {
-      setAchievements([...achievements, achievement]);
+      setAchievements([...achievements, achievementWithTimestamp]);
     }
     setIsFormOpen(false);
     setEditingAchievement(null);

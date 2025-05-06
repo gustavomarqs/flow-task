@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,19 +8,53 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
+import { useAuth } from "@/auth/AuthProvider";
 
 export function AccountSettings() {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [username, setUsername] = useState("Usuário");
-  const [email, setEmail] = useState("usuario@exemplo.com");
+  const { user, profile } = useAuth();
+  
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const handleSaveProfile = () => {
-    toast({
-      title: "Perfil atualizado",
-      description: "Suas informações foram atualizadas com sucesso.",
-    });
+  // Load user data when component mounts
+  useEffect(() => {
+    if (user) {
+      setEmail(user.email || "");
+    }
+    if (profile) {
+      setFullName(profile.fullName || "");
+    }
+  }, [user, profile]);
+
+  const handleSaveProfile = async () => {
+    if (!user) return;
+    
+    setIsSaving(true);
+    try {
+      // Update user metadata
+      const { error: updateError } = await supabase.auth.updateUser({
+        data: { full_name: fullName }
+      });
+      
+      if (updateError) throw updateError;
+      
+      toast({
+        title: "Perfil atualizado",
+        description: "Suas informações foram atualizadas com sucesso.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erro ao atualizar perfil",
+        description: error?.message || "Ocorreu um erro ao atualizar suas informações.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleLogout = async () => {
@@ -32,10 +66,10 @@ export function AccountSettings() {
         description: "Você foi desconectado com sucesso."
       });
       navigate('/login');
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Erro ao fazer logout",
-        description: "Ocorreu um erro ao tentar desconectar sua conta.",
+        description: error?.message || "Ocorreu um erro ao tentar desconectar sua conta.",
         variant: "destructive"
       });
     } finally {
@@ -51,18 +85,31 @@ export function AccountSettings() {
       </CardHeader>
       <CardContent className="space-y-4 p-6">
         <div className="space-y-2">
-          <Label htmlFor="username">Nome de usuário</Label>
-          <Input id="username" value={username} onChange={(e) => setUsername(e.target.value)} className="bg-zinc-800" />
+          <Label htmlFor="fullName">Nome completo</Label>
+          <Input 
+            id="fullName" 
+            value={fullName} 
+            onChange={(e) => setFullName(e.target.value)} 
+            className="bg-zinc-800" 
+          />
         </div>
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
-          <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="bg-zinc-800" />
+          <Input 
+            id="email" 
+            type="email" 
+            value={email} 
+            disabled 
+            className="bg-zinc-800 opacity-70" 
+          />
+          <p className="text-xs text-gray-400">O email não pode ser alterado.</p>
         </div>
         <Button 
           onClick={handleSaveProfile}
+          disabled={isSaving}
           className="mt-2 bg-cyan-700 hover:bg-cyan-600 text-white transition-all duration-200 hover:scale-[1.02]"
         >
-          Salvar alterações
+          {isSaving ? "Salvando..." : "Salvar alterações"}
         </Button>
         
         <div className="pt-6 border-t border-gray-700 mt-6">

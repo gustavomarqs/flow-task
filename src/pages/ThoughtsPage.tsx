@@ -5,25 +5,32 @@ import { ThoughtCard } from '@/components/ThoughtCard';
 import { ThoughtForm } from '@/components/ThoughtForm';
 import { Input } from '@/components/ui/input';
 import { Thought } from '@/types/thought';
+import { getCurrentDateTime } from '@/utils/date-time';
+import { useAuth } from '@/auth/AuthProvider';
 
 export default function ThoughtsPage() {
   const [thoughts, setThoughts] = useState<Thought[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingThought, setEditingThought] = useState<Thought | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const { user } = useAuth();
 
   useEffect(() => {
-    // Load thoughts from localStorage
-    const savedThoughts = localStorage.getItem('thoughts');
-    if (savedThoughts) {
-      setThoughts(JSON.parse(savedThoughts));
+    // Load thoughts from localStorage with user-specific key
+    if (user) {
+      const savedThoughts = localStorage.getItem(`thoughts_${user.id}`);
+      if (savedThoughts) {
+        setThoughts(JSON.parse(savedThoughts));
+      }
     }
-  }, []);
+  }, [user?.id]);
 
   useEffect(() => {
-    // Save thoughts to localStorage
-    localStorage.setItem('thoughts', JSON.stringify(thoughts));
-  }, [thoughts]);
+    // Save thoughts to localStorage with user-specific key
+    if (user) {
+      localStorage.setItem(`thoughts_${user.id}`, JSON.stringify(thoughts));
+    }
+  }, [thoughts, user?.id]);
 
   const handleAddThought = () => {
     setEditingThought(null);
@@ -36,10 +43,16 @@ export default function ThoughtsPage() {
   };
 
   const handleSaveThought = (thought: Thought) => {
+    // Ensure created timestamp is set
+    const thoughtWithTimestamp = {
+      ...thought,
+      createdAt: thought.createdAt || getCurrentDateTime()
+    };
+    
     if (editingThought) {
-      setThoughts(thoughts.map(t => t.id === thought.id ? thought : t));
+      setThoughts(thoughts.map(t => t.id === thought.id ? thoughtWithTimestamp : t));
     } else {
-      setThoughts([...thoughts, thought]);
+      setThoughts([...thoughts, thoughtWithTimestamp]);
     }
     setIsFormOpen(false);
     setEditingThought(null);

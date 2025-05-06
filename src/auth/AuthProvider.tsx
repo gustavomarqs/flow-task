@@ -15,13 +15,15 @@ type AuthContextType = {
   user: User | null;
   profile: UserProfile | null;
   loading: boolean;
+  refreshProfile: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType>({
   session: null,
   user: null,
   profile: null,
-  loading: true
+  loading: true,
+  refreshProfile: async () => {}
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -32,6 +34,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  // Function to refresh user profile data
+  const refreshProfile = async () => {
+    const { data: { session: currentSession } } = await supabase.auth.getSession();
+    
+    if (currentSession?.user) {
+      const userData = currentSession.user.user_metadata;
+      
+      setProfile({
+        id: currentSession.user.id,
+        email: currentSession.user.email || '',
+        fullName: userData?.full_name || ''
+      });
+    }
+  };
 
   useEffect(() => {
     // Configurar o listener de mudança de estado de autenticação
@@ -80,7 +97,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ session, user, profile, loading }}>
+    <AuthContext.Provider value={{ session, user, profile, loading, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   );
