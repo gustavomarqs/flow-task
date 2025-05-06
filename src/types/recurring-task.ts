@@ -6,9 +6,9 @@ export interface RecurringTask {
   category: string;
   active: boolean;
   createdAt: string;
-  frequency?: string; // Adding this property to fix the error
-  timeEstimate?: number; // Adding this property to fix the error
-  lastCompletedDate?: string; // Adding this property to fix the error
+  frequency?: string;
+  timeEstimate?: number;
+  lastCompletedDate?: string;
 }
 
 export interface RecurringTaskEntry {

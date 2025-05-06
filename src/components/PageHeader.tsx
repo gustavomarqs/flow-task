@@ -10,7 +10,7 @@ interface PageHeaderProps {
   action?: () => void;
   actionLabel?: string;
   showAddButton?: boolean;
-  buttonClassName?: string; // Added buttonClassName prop
+  buttonClassName?: string;
 }
 
 export function PageHeader({ 
@@ -19,7 +19,7 @@ export function PageHeader({
   action, 
   actionLabel = "Adicionar", 
   showAddButton = true,
-  buttonClassName // Using the new prop
+  buttonClassName
 }: PageHeaderProps) {
   const { toast } = useToast();
   
@@ -36,10 +36,8 @@ export function PageHeader({
 
   return (
     <div className="space-y-2 mb-6">
-      <h1 className="text-2xl font-bold neon-gradient-text">{title}</h1>
-      {description && <p className="text-muted-foreground">{description}</p>}
       <div className="flex justify-between items-center">
-        <div></div>
+        <h1 className="text-2xl font-bold neon-gradient-text">{title}</h1>
         {showAddButton && (
           <Button
             onClick={handleAction}
@@ -50,6 +48,7 @@ export function PageHeader({
           </Button>
         )}
       </div>
+      {description && <p className="text-muted-foreground">{description}</p>}
     </div>
   );
 }
