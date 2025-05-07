@@ -2,10 +2,11 @@
 import React from 'react';
 import { Task } from '@/types/task';
 import { RecurringTask, RecurringTaskEntry } from '@/types/recurring-task';
-import { TaskCard } from './TaskCard';
-import { RecurringTaskCard } from './RecurringTaskCard';
+import { TaskCard } from '../TaskCard';
+import { RecurringTaskCard } from '../RecurringTaskCard';
+import { EmptyTaskState } from './EmptyTaskState';
 
-interface UnifiedTaskListProps {
+interface TaskListProps {
   regularTasks: Task[];
   recurringTasks: RecurringTask[];
   taskEntries: RecurringTaskEntry[];
@@ -20,7 +21,7 @@ interface UnifiedTaskListProps {
   onStartFocus?: (taskType: 'regular' | 'recurring', task: Task | RecurringTask) => void;
 }
 
-export function UnifiedTaskList({
+export function TaskList({
   regularTasks,
   recurringTasks,
   taskEntries,
@@ -33,12 +34,12 @@ export function UnifiedTaskList({
   onDeleteRecurringTask,
   onViewTaskHistory,
   onStartFocus
-}: UnifiedTaskListProps) {
-  // Obtém as entradas de hoje para tarefas recorrentes
+}: TaskListProps) {
+  // Obtain today's entries for recurring tasks
   const today = new Date().toISOString().split('T')[0];
   const todaysEntries = taskEntries.filter(entry => entry.date === today);
   
-  // Helper para obter entrada de hoje para uma tarefa recorrente
+  // Helper to get today's entry for a recurring task
   const getTodaysEntryForTask = (taskId: string) => {
     return todaysEntries.find(entry => entry.recurringTaskId === taskId) || null;
   };
@@ -63,7 +64,7 @@ export function UnifiedTaskList({
       }))
   ];
 
-  // Ordenamos todas as tarefas por data e hora
+  // Sort all tasks by date and time
   const sortedTasks = allTasks.sort((a, b) => {
     const dateA = new Date(`${a.date}T${a.time || '00:00'}`).getTime();
     const dateB = new Date(`${b.date}T${b.time || '00:00'}`).getTime();
@@ -71,20 +72,14 @@ export function UnifiedTaskList({
   });
 
   if (sortedTasks.length === 0) {
-    return (
-      <div className="text-center py-12 border border-dashed border-gray-700 rounded-lg">
-        <p className="text-gray-400">
-          Nenhuma tarefa encontrada. Comece adicionando uma nova tarefa!
-        </p>
-      </div>
-    );
+    return <EmptyTaskState />;
   }
 
   return (
     <div>
       {sortedTasks.map((item) => {
         if (item.type === 'regular') {
-          // Encontrar a tarefa regular
+          // Find the regular task
           const task = regularTasks.find(t => t.id === item.id);
           if (!task) return null;
           
@@ -100,7 +95,7 @@ export function UnifiedTaskList({
             />
           );
         } else {
-          // Encontrar a tarefa recorrente
+          // Find the recurring task
           const task = recurringTasks.find(t => t.id === item.id);
           if (!task) return null;
           

@@ -1,10 +1,12 @@
 
 import React from 'react';
+import { TabsContent } from "@/components/ui/tabs";
+import { TaskTabContent } from '../task-tab/TaskTabContent';
 import { Task } from '@/types/task';
 import { RecurringTask, RecurringTaskEntry } from '@/types/recurring-task';
-import { UnifiedTaskList } from './UnifiedTaskList';
 
-interface TaskTabContentProps {
+interface TaskCategoryTabContentProps {
+  category: string;
   regularTasks: Task[];
   recurringTasks: RecurringTask[];
   taskEntries: RecurringTaskEntry[];
@@ -19,11 +21,12 @@ interface TaskTabContentProps {
   onStartFocus: (taskType: 'regular' | 'recurring', task: Task | RecurringTask) => void;
 }
 
-export function TaskTabContent({
+export function TaskCategoryTabContent({
+  category,
   regularTasks,
   recurringTasks,
   taskEntries,
-  categoryColors = {},
+  categoryColors,
   onCompleteTask,
   onEditTask,
   onDeleteTask,
@@ -32,12 +35,12 @@ export function TaskTabContent({
   onDeleteRecurringTask,
   onViewTaskHistory,
   onStartFocus
-}: TaskTabContentProps) {
+}: TaskCategoryTabContentProps) {
   return (
-    <div className="space-y-4">
-      <UnifiedTaskList
-        regularTasks={regularTasks}
-        recurringTasks={recurringTasks}
+    <TabsContent value={`category-${category}`} className="mt-0">
+      <TaskTabContent
+        regularTasks={regularTasks.filter(task => task.category === category)}
+        recurringTasks={recurringTasks.filter(task => task.category === category)}
         taskEntries={taskEntries}
         categoryColors={categoryColors}
         onCompleteTask={onCompleteTask}
@@ -49,6 +52,6 @@ export function TaskTabContent({
         onViewTaskHistory={onViewTaskHistory}
         onStartFocus={onStartFocus}
       />
-    </div>
+    </TabsContent>
   );
 }

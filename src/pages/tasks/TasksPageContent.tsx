@@ -2,7 +2,7 @@
 import React from 'react';
 import { PageHeader } from '@/components/PageHeader';
 import { SearchBar } from '@/components/SearchBar';
-import { TasksContent } from '@/components/TasksContent';
+import { TasksContent } from '@/components/tasks-content/TasksContent';
 import { CollapsibleWeeklyProgressCard } from '@/components/CollapsibleWeeklyProgressCard';
 
 interface TasksPageContentProps {

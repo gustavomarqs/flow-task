@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HashRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import MainLayout from "./components/MainLayout";
-import TasksPage from "./pages/TasksPage";
+import TasksPage from "./pages/tasks/TasksPage";
 import AchievementsPage from "./pages/AchievementsPage";
 import ThoughtsPage from "./pages/ThoughtsPage";
 import ConfiguracoesPage from "./pages/ConfiguracoesPage";

@@ -1,6 +1,6 @@
 
-import TasksPage from './tasks/TasksPage';
+import { Navigate } from 'react-router-dom';
 
 export default function Index() {
-  return <TasksPage />;
+  return <Navigate to="/" replace />;
 }
