@@ -19,11 +19,8 @@ export function getCurrentDateTime(): string {
  */
 export function getCurrentDate(): string {
   const now = new Date();
-  // Using locale methods to get the correct day in local timezone
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
+  // Using YYYY-MM-DD format directly from the current date in local timezone
+  return now.toISOString().split('T')[0];
 }
 
 /**
@@ -101,5 +98,5 @@ export function getTimeFromDateTime(dateTimeString: string): string {
  */
 export function getLocalDateFromISO(dateString: string): Date {
   const date = new Date(dateString);
-  return new Date(date.getTime());
+  return date;
 }

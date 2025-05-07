@@ -28,6 +28,7 @@ export function CategoryBreakdown({ categoryData, completedTasks, getColor }: Ca
           <ChartContainer
             className="h-full"
             config={categoryData.reduce((acc, cat, idx) => {
+              // Use a consistent color for each category
               acc[cat.name] = { color: getColor(cat.name, idx) };
               return acc;
             }, {} as Record<string, { color: string }>)}
@@ -70,7 +71,7 @@ export function CategoryBreakdown({ categoryData, completedTasks, getColor }: Ca
                   {categoryData.map((entry, index) => (
                     <Cell 
                       key={`cell-${index}`} 
-                      fill={getColor(entry.name, index)} 
+                      fill={getColor(entry.name, index)}
                       stroke="rgba(20, 20, 20, 0.2)"
                       strokeWidth={1}
                     />

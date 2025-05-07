@@ -7,7 +7,7 @@ interface CategoryBadgeProps {
 }
 
 export function CategoryBadge({ category, color }: CategoryBadgeProps) {
-  // Default color if not provided
+  // Ensure we have a valid color with fallback
   const badgeColor = color || '#06b6d4'; // Cyan default
   
   return (

@@ -32,7 +32,7 @@ export function useTasks() {
   const handleAddTask = (task: Task) => {
     const taskWithTimestamp = {
       ...task,
-      createdAt: task.createdAt || getCurrentDateTime()
+      createdAt: task.createdAt || getCurrentDateTime() // Usar a função corrigida
     };
     
     setTasks(prevTasks => [...prevTasks, taskWithTimestamp]);
@@ -53,7 +53,13 @@ export function useTasks() {
   const handleCompleteTask = (id: string) => {
     setTasks(prevTasks => {
       const updatedTasks = prevTasks.map(task => 
-        task.id === id ? { ...task, completed: !task.completed } : task
+        task.id === id ? 
+        { 
+          ...task, 
+          completed: !task.completed,
+          // Ao marcar como completa, atualizar o timestamp de conclusão
+          completedAt: !task.completed ? getCurrentDateTime() : undefined 
+        } : task
       );
       
       // Find the task that was just updated

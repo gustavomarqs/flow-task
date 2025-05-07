@@ -30,6 +30,7 @@ export function WeeklyProgressCard({
   
   // Function to get color for a category
   const getColor = (category: string, index: number) => {
+    // Use our improved getCategoryColor function that respects user-defined colors
     return getCategoryColor(category, index, categoryColors);
   };
 

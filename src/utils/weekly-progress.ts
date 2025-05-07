@@ -112,11 +112,22 @@ export function getCategoryColor(
   index: number, 
   categoryColors: Record<string, string>
 ): string {
+  // If we have a custom color for this category, use it
+  if (categoryColors[category]) {
+    return categoryColors[category];
+  }
+  
   // Default color palette
   const defaultColors = [
     '#06b6d4', '#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444'
   ];
   
-  // Return custom color if available, or default color
-  return categoryColors[category] || defaultColors[index % defaultColors.length];
+  // For consistency, use deterministic index based on category name
+  // This ensures the same category always gets the same color
+  const hashCode = Array.from(category).reduce(
+    (hash, char) => char.charCodeAt(0) + ((hash << 5) - hash), 0
+  );
+  
+  const colorIndex = Math.abs(hashCode % defaultColors.length);
+  return defaultColors[colorIndex];
 }

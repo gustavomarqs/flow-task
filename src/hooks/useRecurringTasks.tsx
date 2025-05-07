@@ -104,7 +104,9 @@ export function useRecurringTasks() {
     // Make sure entry has createdAt timestamp
     const entryWithTimestamp = {
       ...entry,
-      createdAt: entry.createdAt || getCurrentDateTime()
+      createdAt: entry.createdAt || getCurrentDateTime(),
+      // Ensure we have the current date (not UTC which could cause day differences)
+      date: entry.date || getCurrentDate()
     };
     
     // Check if there's already an entry for today's task
@@ -121,7 +123,8 @@ export function useRecurringTasks() {
         ...newEntries[existingEntryIndex],
         completed: isCompleted,
         // Preserve the details if the task is being marked as complete again
-        details: isCompleted ? (entryWithTimestamp.details || newEntries[existingEntryIndex].details) : newEntries[existingEntryIndex].details
+        details: isCompleted ? (entryWithTimestamp.details || newEntries[existingEntryIndex].details) : newEntries[existingEntryIndex].details,
+        category: entryWithTimestamp.category || newEntries[existingEntryIndex].category
       };
       setTaskEntries(newEntries);
       
