@@ -119,7 +119,9 @@ export function useRecurringTasks() {
       const isCompleted = !newEntries[existingEntryIndex].completed;
       newEntries[existingEntryIndex] = {
         ...newEntries[existingEntryIndex],
-        completed: isCompleted
+        completed: isCompleted,
+        // Preserve the details if the task is being marked as complete again
+        details: isCompleted ? (entryWithTimestamp.details || newEntries[existingEntryIndex].details) : newEntries[existingEntryIndex].details
       };
       setTaskEntries(newEntries);
       
@@ -181,7 +183,7 @@ export function useRecurringTasks() {
   
   // Get today's entries for recurring tasks
   const getTodaysEntries = () => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getCurrentDate();
     return taskEntries.filter(entry => entry.date === today);
   };
   

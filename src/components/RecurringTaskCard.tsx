@@ -65,7 +65,8 @@ export function RecurringTaskCard({
         details: entryDetails,
         date: today,
         completed: true,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        category: task.category // Make sure to include category
       };
       onComplete(newEntry);
     }

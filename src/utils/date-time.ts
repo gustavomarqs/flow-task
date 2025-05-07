@@ -19,6 +19,7 @@ export function getCurrentDateTime(): string {
  */
 export function getCurrentDate(): string {
   const now = new Date();
+  // Using locale methods to get the correct day in local timezone
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, '0');
   const day = String(now.getDate()).padStart(2, '0');
@@ -31,12 +32,12 @@ export function getCurrentDate(): string {
 export function formatDisplayDate(dateString: string): string {
   try {
     const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR', {
+    // Using Brazilian locale to format dates properly
+    return new Intl.DateTimeFormat('pt-BR', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
-      timeZone: 'America/Sao_Paulo' // Set to Brazil timezone for consistency
-    });
+    }).format(date);
   } catch (error) {
     console.error('Error formatting date:', error);
     return dateString;
@@ -49,14 +50,14 @@ export function formatDisplayDate(dateString: string): string {
 export function formatDisplayDateTime(dateString: string): string {
   try {
     const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR', {
+    // Using Brazilian locale to format dates properly with time
+    return new Intl.DateTimeFormat('pt-BR', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-      timeZone: 'America/Sao_Paulo' // Set to Brazil timezone for consistency
-    });
+    }).format(date);
   } catch (error) {
     console.error('Error formatting date and time:', error);
     return dateString;
@@ -100,5 +101,5 @@ export function getTimeFromDateTime(dateTimeString: string): string {
  */
 export function getLocalDateFromISO(dateString: string): Date {
   const date = new Date(dateString);
-  return new Date(date.getTime() + date.getTimezoneOffset() * 60 * 1000);
+  return new Date(date.getTime());
 }
