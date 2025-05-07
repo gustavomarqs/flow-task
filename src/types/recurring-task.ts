@@ -19,4 +19,5 @@ export interface RecurringTaskEntry {
   date: string;
   completed: boolean;
   createdAt: string;
+  category?: string; // Added category property
 }
