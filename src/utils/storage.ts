@@ -1,4 +1,3 @@
-
 /**
  * Salva um valor no localStorage
  */
@@ -47,8 +46,9 @@ export function clearStorage(): void {
 
 /**
  * Obtém cores das categorias ou retorna valores padrão
+ * This now respects provided categoryColors first
  */
-export function getCategoryColors(categories: string[]): Record<string, string> {
+export function getCategoryColors(categories: string[], existingColors: Record<string, string> = {}): Record<string, string> {
   const defaultColors = [
     '#06b6d4', // cyan
     '#3b82f6', // blue
@@ -58,12 +58,25 @@ export function getCategoryColors(categories: string[]): Record<string, string> 
     '#ef4444', // red
   ];
   
-  const savedColors = getFromStorage<Record<string, string>>('categoryColors', {});
   const result: Record<string, string> = {};
   
-  // Set a color for each category, using saved color or default
+  // Set a color for each category
   categories.forEach((category, index) => {
-    result[category] = savedColors[category] || defaultColors[index % defaultColors.length];
+    // First check if there's already a color for this category in existingColors
+    if (existingColors && existingColors[category]) {
+      result[category] = existingColors[category];
+      return;
+    }
+    
+    // Otherwise use localStorage
+    const savedColors = getFromStorage<Record<string, string>>('categoryColors', {});
+    if (savedColors[category]) {
+      result[category] = savedColors[category];
+      return;
+    }
+    
+    // As a final fallback, use default colors
+    result[category] = defaultColors[index % defaultColors.length];
   });
   
   return result;

@@ -8,19 +8,21 @@
  * This ensures we always have consistent date/time recording
  */
 export function getCurrentDateTime(): string {
-  // Use the browser's timezone to get the correct local date and time
+  // Get the current date and time in the local timezone
   const now = new Date();
   return now.toISOString();
 }
 
 /**
  * Gets the current date in YYYY-MM-DD format
- * Ensures we get the correct local date (not UTC date which can cause day differences)
+ * Uses the local timezone (not UTC) to avoid day discrepancies
  */
 export function getCurrentDate(): string {
   const now = new Date();
-  // Using YYYY-MM-DD format directly from the current date in local timezone
-  return now.toISOString().split('T')[0];
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 /**
@@ -34,6 +36,7 @@ export function formatDisplayDate(dateString: string): string {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
+      timeZone: 'America/Sao_Paulo', // Using Sao Paulo timezone for Brazilian users
     }).format(date);
   } catch (error) {
     console.error('Error formatting date:', error);
@@ -54,6 +57,7 @@ export function formatDisplayDateTime(dateString: string): string {
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
+      timeZone: 'America/Sao_Paulo', // Using Sao Paulo timezone for Brazilian users
     }).format(date);
   } catch (error) {
     console.error('Error formatting date and time:', error);
@@ -85,7 +89,9 @@ export function ensureValidDate(dateString: string | undefined): string {
 export function getTimeFromDateTime(dateTimeString: string): string {
   try {
     const date = new Date(dateTimeString);
-    return date.toTimeString().substring(0, 5); // Get HH:MM
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
   } catch (error) {
     console.error('Error getting time from date string:', error);
     return '';

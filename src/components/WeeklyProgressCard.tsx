@@ -30,7 +30,12 @@ export function WeeklyProgressCard({
   
   // Function to get color for a category
   const getColor = (category: string, index: number) => {
-    // Use our improved getCategoryColor function that respects user-defined colors
+    // First look up the color in the categoryColors passed from props
+    if (categoryColors && categoryColors[category]) {
+      return categoryColors[category];
+    }
+    
+    // As fallback, use getCategoryColor
     return getCategoryColor(category, index, categoryColors);
   };
 
