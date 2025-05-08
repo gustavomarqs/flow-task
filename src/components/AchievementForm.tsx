@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Achievement } from '@/types/achievement';
 import { v4 as uuidv4 } from 'uuid';
+import { getCurrentDateTime } from '@/utils/date-time';
 
 interface AchievementFormProps {
   isOpen: boolean;
@@ -47,7 +48,7 @@ export function AchievementForm({
       title,
       description,
       date,
-      createdAt: editAchievement?.createdAt || new Date().toISOString(),
+      createdAt: editAchievement?.createdAt || getCurrentDateTime(), // Use timezone-aware function
     };
     
     onSave(achievementData);

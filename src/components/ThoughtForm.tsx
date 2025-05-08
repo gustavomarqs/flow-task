@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Thought } from '@/types/thought';
 import { v4 as uuidv4 } from 'uuid';
+import { getCurrentDateTime } from '@/utils/date-time';
 
 interface ThoughtFormProps {
   isOpen: boolean;
@@ -47,7 +48,7 @@ export function ThoughtForm({
       title,
       content,
       date,
-      createdAt: editThought?.createdAt || new Date().toISOString(),
+      createdAt: editThought?.createdAt || getCurrentDateTime(), // Use timezone-aware function
     };
     
     onSave(thoughtData);

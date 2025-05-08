@@ -43,7 +43,7 @@ export default function ThoughtsPage() {
   };
 
   const handleSaveThought = (thought: Thought) => {
-    // Ensure created timestamp is set
+    // Ensure created timestamp is set with proper timezone
     const thoughtWithTimestamp = {
       ...thought,
       createdAt: thought.createdAt || getCurrentDateTime()

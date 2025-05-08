@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { RecurringTask, RecurringTaskEntry } from '@/types/recurring-task';
 import { getFromStorage, saveToStorage } from '@/utils/storage';
@@ -82,7 +81,7 @@ export function useRecurringTasks() {
   const handleAddRecurringTask = (task: RecurringTask) => {
     const taskWithTimestamp = {
       ...task,
-      createdAt: task.createdAt || getCurrentDateTime()
+      createdAt: task.createdAt || getCurrentDateTime() // Use timezone-aware function
     };
     
     setRecurringTasks(prevTasks => [...prevTasks, taskWithTimestamp]);
@@ -101,7 +100,7 @@ export function useRecurringTasks() {
   };
   
   const handleCompleteRecurringTask = (entry: RecurringTaskEntry) => {
-    // Make sure entry has createdAt timestamp
+    // Make sure entry has createdAt timestamp with proper timezone
     const entryWithTimestamp = {
       ...entry,
       createdAt: entry.createdAt || getCurrentDateTime(),

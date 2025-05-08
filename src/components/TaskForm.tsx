@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -11,6 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { CategoryBadge } from './CategoryBadge';
 import { Switch } from "@/components/ui/switch";
 import { Plus } from 'lucide-react';
+import { getCurrentDateTime } from '@/utils/date-time';
 
 interface TaskFormProps {
   isOpen: boolean;
@@ -85,7 +85,7 @@ export function TaskForm({
         description,
         category: finalCategory,
         active: editRecurringTask?.active !== undefined ? editRecurringTask.active : true,
-        createdAt: editRecurringTask?.createdAt || new Date().toISOString(),
+        createdAt: editRecurringTask?.createdAt || getCurrentDateTime(), // Use timezone-aware function
       };
       
       onSaveRecurringTask(taskData);
@@ -98,7 +98,7 @@ export function TaskForm({
         date,
         time,
         completed: editTask?.completed || false,
-        createdAt: editTask?.createdAt || new Date().toISOString(),
+        createdAt: editTask?.createdAt || getCurrentDateTime(), // Use timezone-aware function
       };
       
       onSaveTask(taskData);

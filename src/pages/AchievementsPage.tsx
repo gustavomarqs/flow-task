@@ -43,7 +43,7 @@ export default function AchievementsPage() {
   };
 
   const handleSaveAchievement = (achievement: Achievement) => {
-    // Ensure created timestamp is set
+    // Ensure created timestamp is set with proper timezone
     const achievementWithTimestamp = {
       ...achievement,
       createdAt: achievement.createdAt || getCurrentDateTime()

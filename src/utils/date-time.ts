@@ -1,16 +1,15 @@
-
 /**
  * Utility functions for handling date and time consistently across the application
  */
+import { getTimestampInSaoPaulo } from './time';
 
 /**
  * Gets the current date and time in ISO format
  * This ensures we always have consistent date/time recording
  */
 export function getCurrentDateTime(): string {
-  // Get the current date and time in the local timezone
-  const now = new Date();
-  return now.toISOString();
+  // Use the São Paulo timezone function instead of basic ISO
+  return getTimestampInSaoPaulo();
 }
 
 /**

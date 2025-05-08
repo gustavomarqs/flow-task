@@ -103,7 +103,7 @@ export function useTasks() {
     
     const taskWithTimestamp = {
       ...task,
-      createdAt: getCurrentDateTime() // Use current date time in ISO format
+      createdAt: getCurrentDateTime() // Use current date time with proper timezone
     };
     
     try {
@@ -130,7 +130,7 @@ export function useTasks() {
           date: taskWithTimestamp.date,
           time: taskWithTimestamp.time,
           completed: taskWithTimestamp.completed,
-          created_at: taskWithTimestamp.createdAt,
+          created_at: taskWithTimestamp.createdAt, // Using proper timezone
           time_estimate: taskWithTimestamp.timeEstimate,
           user_id: user.id
         }])
@@ -226,7 +226,7 @@ export function useTasks() {
       // Toggle completion status
       const completed = !taskToUpdate.completed;
       
-      // Current date-time for completion
+      // Current date-time for completion with proper timezone
       const completedAt = completed ? getCurrentDateTime() : undefined;
       
       // Update in Supabase
