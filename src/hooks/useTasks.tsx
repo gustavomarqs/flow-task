@@ -36,13 +36,39 @@ export function useTasks() {
             id: task.id,
             title: task.title,
             description: task.description || undefined,
-            category: task.category || "Geral",
+            // Map category_id to category - this requires getting the category name from somewhere
+            // For now, we'll use "Geral" as a fallback
+            category: "Geral", // We'll need to update this when we fetch category data
             date: task.date,
             time: task.time || undefined,
             completed: task.completed,
             createdAt: task.created_at,
             timeEstimate: task.time_estimate
           }));
+          
+          // Now fetch the categories for each task
+          const categoriesResult = await supabase
+            .from('categories')
+            .select('id, name')
+            .in('id', data.filter(t => t.category_id).map(t => t.category_id));
+            
+          if (categoriesResult.error) {
+            console.error('Error fetching categories:', categoriesResult.error);
+          } else if (categoriesResult.data) {
+            // Create a mapping of category_id to name
+            const categoryMap: Record<string, string> = {};
+            categoriesResult.data.forEach(cat => {
+              categoryMap[cat.id] = cat.name;
+            });
+            
+            // Update the tasks with the correct category names
+            formattedTasks.forEach(task => {
+              const originalTask = data.find(t => t.id === task.id);
+              if (originalTask && originalTask.category_id && categoryMap[originalTask.category_id]) {
+                task.category = categoryMap[originalTask.category_id];
+              }
+            });
+          }
           
           setTasks(formattedTasks);
           
@@ -81,6 +107,18 @@ export function useTasks() {
     };
     
     try {
+      // First, need to find the category_id for this task's category name
+      const { data: categoryData, error: categoryError } = await supabase
+        .from('categories')
+        .select('id')
+        .eq('name', task.category)
+        .eq('user_id', user.id)
+        .maybeSingle();
+      
+      if (categoryError) {
+        console.error('Error getting category:', categoryError);
+      }
+      
       // Insert into Supabase
       const { data, error } = await supabase
         .from('tasks')
@@ -88,7 +126,7 @@ export function useTasks() {
           id: taskWithTimestamp.id,
           title: taskWithTimestamp.title,
           description: taskWithTimestamp.description,
-          category: taskWithTimestamp.category,
+          category_id: categoryData?.id, // Use the found category_id, or null if not found
           date: taskWithTimestamp.date,
           time: taskWithTimestamp.time,
           completed: taskWithTimestamp.completed,
@@ -126,13 +164,25 @@ export function useTasks() {
     if (!user) return;
     
     try {
+      // First, need to find the category_id for this task's category name
+      const { data: categoryData, error: categoryError } = await supabase
+        .from('categories')
+        .select('id')
+        .eq('name', task.category)
+        .eq('user_id', user.id)
+        .maybeSingle();
+      
+      if (categoryError) {
+        console.error('Error getting category:', categoryError);
+      }
+      
       // Update in Supabase
       const { error } = await supabase
         .from('tasks')
         .update({
           title: task.title,
           description: task.description,
-          category: task.category,
+          category_id: categoryData?.id, // Use the found category_id, or null if not found
           date: task.date,
           time: task.time,
           completed: task.completed,
