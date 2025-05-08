@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Task } from '@/types/task';
 import { getFromStorage, saveToStorage } from '@/utils/storage';
 import { getCurrentDateTime } from '@/utils/date-time';
+import { getTimestampInSaoPaulo } from '@/utils/time';
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/auth/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
@@ -227,7 +228,9 @@ export function useTasks() {
       const completed = !taskToUpdate.completed;
       
       // Current date-time for completion with proper timezone
-      const completedAt = completed ? getCurrentDateTime() : undefined;
+      const completedAt = completed ? getTimestampInSaoPaulo() : null;
+      
+      console.log('Updating task completion status:', { id, completed, completedAt });
       
       // Update in Supabase
       const { error } = await supabase
@@ -240,6 +243,7 @@ export function useTasks() {
         .eq('user_id', user.id);
         
       if (error) {
+        console.error('Supabase error when completing task:', error);
         throw error;
       }
       

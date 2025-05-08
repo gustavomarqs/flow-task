@@ -7,7 +7,7 @@ import { Slider } from "@/components/ui/slider";
 import { Task } from '@/types/task';
 import { RecurringTask, RecurringTaskEntry } from '@/types/recurring-task';
 import { CategoryBadge } from './CategoryBadge';
-import { Clock, Check, X, Play, Pause, Timer } from 'lucide-react';
+import { Clock, Check, Play, Pause } from 'lucide-react';
 
 export interface FocusModeProps {
   selectedTask: { 
@@ -18,7 +18,7 @@ export interface FocusModeProps {
   onClose: () => void;
   onCompleteTask: (id: string) => void;
   onCompleteRecurringTask: (entry: RecurringTaskEntry) => void;
-  categoryColors?: Record<string, string>; // Make categoryColors optional
+  categoryColors?: Record<string, string>; 
 }
 
 export function FocusMode({ 
@@ -27,7 +27,7 @@ export function FocusMode({
   onClose,
   onCompleteTask,
   onCompleteRecurringTask,
-  categoryColors = {} // Default to empty object
+  categoryColors = {} 
 }: FocusModeProps) {
   const [progress, setProgress] = useState(0);
   const [timerActive, setTimerActive] = useState(false);
@@ -102,7 +102,8 @@ export function FocusMode({
         title: recurringTask.title,
         date: today,
         completed: true,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        category: recurringTask.category
       };
       onCompleteRecurringTask(newEntry);
     }
@@ -115,12 +116,8 @@ export function FocusMode({
     }}>
       <DialogContent className="bg-zinc-900/90 text-white rounded-2xl shadow-md border-zinc-800 border max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-lg font-semibold flex justify-between items-center">
+          <DialogTitle className="text-lg font-semibold">
             {selectedTask?.task.title}
-            <Button size="icon" variant="ghost" className="h-8 w-8" onClick={onClose}>
-              <X className="h-4 w-4" />
-              <span className="sr-only">Fechar</span>
-            </Button>
           </DialogTitle>
         </DialogHeader>
 
