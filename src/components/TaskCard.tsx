@@ -11,7 +11,8 @@ import { Button } from "@/components/ui/button";
 import { CategoryBadge } from '@/components/CategoryBadge';
 import { Clock, Check, Edit, Trash2, Timer } from 'lucide-react';
 import { Task } from '@/types/task';
-import { formatDate } from '@/lib/utils';
+// ✅ Usar utilitário com fuso horário correto
+import { formatDateInSaoPaulo } from '@/utils/time';
 
 interface TaskCardProps {
   task: Task;
@@ -34,7 +35,9 @@ export function TaskCard({ task, onComplete, onEdit, onDelete, onStartFocus, cat
               {task.title}
             </CardTitle>
             <CardDescription className="flex items-center mt-2 text-gray-400">
-              <Clock className="h-3.5 w-3.5 mr-1.5" /> {formatDate(task.date)}
+              <Clock className="h-3.5 w-3.5 mr-1.5" />
+              {/* ✅ Usa fuso horário correto */}
+              {formatDateInSaoPaulo(task.date, "dd/MM/yyyy")}
               {task.time && ` • ${task.time}`}
             </CardDescription>
           </div>
