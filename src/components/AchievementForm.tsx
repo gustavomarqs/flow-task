@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -8,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Achievement } from '@/types/achievement';
 import { v4 as uuidv4 } from 'uuid';
 import { getCurrentDateTime } from '@/utils/date-time';
+import { getTodaySaoPaulo } from '@/utils/time'; // ✅ Importação correta
 
 interface AchievementFormProps {
   isOpen: boolean;
@@ -32,8 +32,7 @@ export function AchievementForm({
       setDescription(editAchievement.description || "");
       setDate(editAchievement.date);
     } else {
-      // Set today's date as default for new achievements
-      const today = new Date().toISOString().split('T')[0];
+      const today = getTodaySaoPaulo(); // ✅ Correção aplicada aqui
       setTitle("");
       setDescription("");
       setDate(today);
@@ -48,7 +47,7 @@ export function AchievementForm({
       title,
       description,
       date,
-      createdAt: editAchievement?.createdAt || getCurrentDateTime(), // Use timezone-aware function
+      createdAt: editAchievement?.createdAt || getCurrentDateTime(),
     };
     
     onSave(achievementData);
