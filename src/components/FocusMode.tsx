@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -35,15 +34,12 @@ export function FocusMode({
   const [selectedDuration, setSelectedDuration] = useState(25); // Default to 25 minutes
 
   useEffect(() => {
-    if (selectedTask?.task) {
-      // Safely check if timeEstimate exists and use it as default if available
-      const timeEstimate = 'timeEstimate' in selectedTask.task ? selectedTask.task.timeEstimate : undefined;
-      setSelectedDuration(timeEstimate ? Math.min(Math.max(timeEstimate, 5), 60) : 25);
-      resetTimer(timeEstimate ? timeEstimate : 25);
-    } else {
-      setSelectedDuration(25);
-      resetTimer(25);
-    }
+    const defaultDuration = (selectedTask?.task && 'timeEstimate' in selectedTask.task && selectedTask.task.timeEstimate)
+      ? Math.min(Math.max(selectedTask.task.timeEstimate, 5), 60)
+      : 25;
+
+    setSelectedDuration(defaultDuration);
+    resetTimer(defaultDuration);
     setProgress(0);
     setTimerActive(false);
   }, [selectedTask]);
@@ -55,17 +51,20 @@ export function FocusMode({
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
-    
+    const totalSeconds = selectedDuration * 60;
+
     if (timerActive && timeRemaining > 0) {
       intervalId = setInterval(() => {
-        setTimeRemaining(prevTime => prevTime - 1);
-        const totalSeconds = selectedDuration * 60;
-        const remainingPercentage = ((totalSeconds - timeRemaining + 1) / totalSeconds) * 100;
-        setProgress(Math.min(remainingPercentage, 100));
+        setTimeRemaining(prevTime => {
+          const newTime = prevTime - 1;
+          const percentage = ((totalSeconds - newTime) / totalSeconds) * 100;
+          setProgress(Math.min(percentage, 100));
+          return newTime;
+        });
       }, 1000);
     } else if (timeRemaining === 0 && timerActive) {
       setTimerActive(false);
-      // Optionally play a sound or show a notification
+      // Ex: disparar notificação ou som
     }
 
     return () => clearInterval(intervalId);
@@ -93,7 +92,6 @@ export function FocusMode({
     if (selectedTask.type === 'regular') {
       onCompleteTask(selectedTask.task.id);
     } else if (selectedTask.type === 'recurring') {
-      // Create a new RecurringTaskEntry with the required properties
       const today = new Date().toISOString().split('T')[0];
       const recurringTask = selectedTask.task as RecurringTask;
       const newEntry: RecurringTaskEntry = {
@@ -109,7 +107,7 @@ export function FocusMode({
     }
     onClose();
   };
-  
+
   return (
     <Dialog open={isOpen} onOpenChange={() => {
       if (isOpen) onClose();
@@ -161,6 +159,7 @@ export function FocusMode({
                 size="lg"
                 className="flex-1 border-cyan-800/40 hover:bg-cyan-900/30 text-white"
                 onClick={toggleTimer}
+                aria-label={timerActive ? "Pausar timer" : "Iniciar timer"}
               >
                 {timerActive ? (
                   <><Pause className="w-4 h-4 mr-2" /> Pausar</>
@@ -173,6 +172,7 @@ export function FocusMode({
                 className="flex-1 bg-cyan-700 hover:bg-cyan-600 text-white" 
                 size="lg"
                 onClick={handleComplete}
+                aria-label="Concluir tarefa"
               >
                 <Check className="w-4 h-4 mr-2" />
                 Concluir
