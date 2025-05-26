@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -8,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Thought } from '@/types/thought';
 import { v4 as uuidv4 } from 'uuid';
 import { getCurrentDateTime } from '@/utils/date-time';
+import { getTodaySaoPaulo } from '@/utils/time'; // ✅ Importado
 
 interface ThoughtFormProps {
   isOpen: boolean;
@@ -32,8 +32,8 @@ export function ThoughtForm({
       setContent(editThought.content);
       setDate(editThought.date);
     } else {
-      // Set today's date as default for new thoughts
-      const today = new Date().toISOString().split('T')[0];
+      // ✅ Usa data de hoje no fuso de São Paulo
+      const today = getTodaySaoPaulo();
       setTitle("");
       setContent("");
       setDate(today);
@@ -48,7 +48,7 @@ export function ThoughtForm({
       title,
       content,
       date,
-      createdAt: editThought?.createdAt || getCurrentDateTime(), // Use timezone-aware function
+      createdAt: editThought?.createdAt || getCurrentDateTime(),
     };
     
     onSave(thoughtData);
