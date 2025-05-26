@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Card, 
@@ -10,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Trophy, Clock, Edit, Trash2 } from 'lucide-react';
 import { Achievement } from '@/types/achievement';
-import { formatDate } from '@/lib/utils';
+import { formatDateInSaoPaulo } from '@/utils/time';
 
 interface AchievementCardProps {
   achievement: Achievement;
@@ -28,7 +27,7 @@ export function AchievementCard({ achievement, onEdit, onDelete }: AchievementCa
             {achievement.title}
           </CardTitle>
           <span className="text-xs text-gray-400 flex items-center">
-            <Clock className="h-3 w-3 mr-1" /> {formatDate(achievement.date)}
+            <Clock className="h-3 w-3 mr-1" /> {formatDateInSaoPaulo(achievement.date, "dd/MM/yyyy")}
           </span>
         </div>
       </CardHeader>
