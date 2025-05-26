@@ -105,3 +105,8 @@ export function getLocalDateFromISO(dateString: string): Date {
   const date = new Date(dateString);
   return date;
 }
+
+export function getTodayISODate(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
